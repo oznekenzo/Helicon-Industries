@@ -1,31 +1,64 @@
-import { unstable_cache } from "next/cache";
+import type { Metadata } from "next";
 
-import { ControlTowerScreen } from "@/features/control-tower/components/control-tower-screen";
-import { getControlTowerPageData } from "@/features/control-tower/data";
-import { createDatabase } from "@db/client";
+import { BrandLockup } from "@/components/ui/brand-lockup";
+import { SignInForm } from "@/features/auth/sign-in-form";
 
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Helicon Control Tower",
+};
 
-function connectionString() {
-  const value = process.env.DATABASE_URL;
-  if (!value) throw new Error("DATABASE_URL is not configured.");
-  return value;
-}
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+  const hasError = error === "invalid";
 
-const getCachedControlTowerData = unstable_cache(
-  async () => {
-    const { client, db } = createDatabase(connectionString());
-    try {
-      return await getControlTowerPageData(db, "la_01");
-    } finally {
-      await client.end();
-    }
-  },
-  ["control-tower", "la_01"],
-  { revalidate: 60, tags: ["control-tower"] },
-);
+  return (
+    <main className="auth-page">
+      <section className="auth-context" aria-label="Control Tower context">
+        <BrandLockup className="auth-brand" variant="product" />
 
-export default async function HomePage() {
-  const data = await getCachedControlTowerData();
-  return <ControlTowerScreen initialData={data} />;
+        <div className="auth-context__intro">
+          <h1>Helicon Control Tower</h1>
+          <p>See how the facility is running and what needs attention.</p>
+          <div
+            aria-label="Twelve of sixteen status segments active"
+            className="auth-status-strip"
+            role="img"
+          >
+            {Array.from({ length: 16 }, (_, index) => (
+              <span
+                className={index < 12 ? "is-active" : undefined}
+                key={index}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="auth-context__facts">
+          <div>
+            <span>FACILITIES</span>
+            <strong>la_01 · la_02</strong>
+          </div>
+          <div>
+            <span>SNAPSHOT</span>
+            <strong>13 AUG 2026, 23:06 UTC</strong>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="sign-in-heading" className="auth-panel">
+        <div className="auth-panel__content">
+          <div className="auth-panel__intro">
+            <h2 id="sign-in-heading">Sign in</h2>
+            <p>Use your facility operations account.</p>
+          </div>
+
+          <SignInForm hasError={hasError} />
+        </div>
+      </section>
+    </main>
+  );
 }
