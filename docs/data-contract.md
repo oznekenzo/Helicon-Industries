@@ -4,21 +4,21 @@
 
 The supplied source is `manufacturing_events.jsonl`, a synthetic JSON Lines event log.
 
-| Property | Value |
-|---|---:|
-| Rows | 19,519 |
-| Unique event IDs | 19,500 |
-| First timestamp | `2026-07-03T13:41:56Z` |
-| Last timestamp | `2026-08-13T23:06:33Z` |
-| Jobs | 312 |
-| Parts | 25 |
-| Customers | 16 |
-| Machines and stations | 10 |
-| Tools | 25 |
-| Materials | 8 |
-| Operators | 24 |
-| Inspectors | 12 |
-| Facilities | 2 |
+| Property              |                  Value |
+| --------------------- | ---------------------: |
+| Rows                  |                 19,519 |
+| Unique event IDs      |                 19,500 |
+| First timestamp       | `2026-07-03T13:41:56Z` |
+| Last timestamp        | `2026-08-13T23:06:33Z` |
+| Jobs                  |                    312 |
+| Parts                 |                     25 |
+| Customers             |                     16 |
+| Machines and stations |                     10 |
+| Tools                 |                     25 |
+| Materials             |                      8 |
+| Operators             |                     24 |
+| Inspectors            |                     12 |
+| Facilities            |                      2 |
 
 ## Raw event
 
@@ -71,12 +71,7 @@ type EventMetadata = {
 };
 
 type DefectCode =
-  | "voids"
-  | "delamination"
-  | "dimensional"
-  | "surface"
-  | "resin_rich"
-  | "other";
+  "voids" | "delamination" | "dimensional" | "surface" | "resin_rich" | "other";
 
 type BlockReason =
   | "missing_tool"
@@ -99,22 +94,22 @@ Timestamps are ISO-8601 UTC strings. `event_type` is an enum; cycle completion, 
 
 ## Event-specific metadata
 
-| Event type | Count | Relevant metadata |
-|---|---:|---|
-| `job_created` | 312 | facility, priority, target due time, target quantity, optional Tool, optional unit price estimate |
-| `tool_ready` | 302 | facility, optional Tool |
-| `job_started` | 302 | facility, optional Tool, optional Operator |
-| `cycle_completed` | 12,965 | facility, cycle time, optional Tool |
-| `inspection_passed` | 2,765 | facility, optional Inspector |
-| `inspection_failed` | 2,388 | facility, defect code, optional Inspector |
-| `job_blocked` | 68 | facility, block reason |
-| `job_unblocked` | 59 | facility, optional resolved reason |
-| `job_hold` | 13 | facility |
-| `job_completed` | 282 | facility, good quantity, scrap quantity |
-| `maintenance_ping` | 16 | facility |
-| `material_lot_scan` | 14 | facility, lot ID |
-| `sensor_glitch` | 16 | facility, signal category |
-| `shift_handoff` | 17 | facility |
+| Event type          |  Count | Relevant metadata                                                                                 |
+| ------------------- | -----: | ------------------------------------------------------------------------------------------------- |
+| `job_created`       |    312 | facility, priority, target due time, target quantity, optional Tool, optional unit price estimate |
+| `tool_ready`        |    302 | facility, optional Tool                                                                           |
+| `job_started`       |    302 | facility, optional Tool, optional Operator                                                        |
+| `cycle_completed`   | 12,965 | facility, cycle time, optional Tool                                                               |
+| `inspection_passed` |  2,765 | facility, optional Inspector                                                                      |
+| `inspection_failed` |  2,388 | facility, defect code, optional Inspector                                                         |
+| `job_blocked`       |     68 | facility, block reason                                                                            |
+| `job_unblocked`     |     59 | facility, optional resolved reason                                                                |
+| `job_hold`          |     13 | facility                                                                                          |
+| `job_completed`     |    282 | facility, good quantity, scrap quantity                                                           |
+| `maintenance_ping`  |     16 | facility                                                                                          |
+| `material_lot_scan` |     14 | facility, lot ID                                                                                  |
+| `sensor_glitch`     |     16 | facility, signal category                                                                         |
+| `shift_handoff`     |     17 | facility                                                                                          |
 
 For `tool_ready`, `machine_id` identifies a Tooling Station such as `tooling_02`; `metadata.tool_id` identifies the physical Tool such as `tool_20`.
 
@@ -291,14 +286,14 @@ Every Operational Issue references Source Fact evidence. Category, severity, Req
 
 ## Data-quality observations
 
-| Observation | Count |
-|---|---:|
-| Repeated event IDs | 19 |
-| Repeated IDs with conflicting payloads | 5 |
-| `job_started` events missing `operator_id` | 59 of 302 |
-| Inspection events missing `inspector_id` | 1,391 of 5,153 |
-| Cycles missing `tool_id` | 81 of 12,965 |
-| Cycles missing `machine_id` | 98 of 12,965 |
-| Jobs missing `unit_price_estimate` | 162 of 312 |
+| Observation                                |          Count |
+| ------------------------------------------ | -------------: |
+| Repeated event IDs                         |             19 |
+| Repeated IDs with conflicting payloads     |              5 |
+| `job_started` events missing `operator_id` |      59 of 302 |
+| Inspection events missing `inspector_id`   | 1,391 of 5,153 |
+| Cycles missing `tool_id`                   |   81 of 12,965 |
+| Cycles missing `machine_id`                |   98 of 12,965 |
+| Jobs missing `unit_price_estimate`         |     162 of 312 |
 
 These observations are disclosed rather than replaced with fabricated values or an arbitrary confidence score.

@@ -69,14 +69,14 @@ Source Facts remain distinguishable from Derived Signals and Workflow Facts.
 
 The event log contains Operator and Inspector IDs but no technician roster. The prototype adds these Responders for Operational Issue ownership:
 
-| ID | Display name | Role |
-|---|---|---|
-| `tech_01` | Maya Chen | Tooling technician |
-| `tech_02` | Luis Reyes | Maintenance technician |
-| `tech_03` | Priya Shah | Quality engineer |
-| `tech_04` | Jordan Brooks | Process engineer |
-| `tech_05` | Sam Okafor | Material coordinator |
-| `tech_06` | Avery Kim | Shift supervisor |
+| ID        | Display name  | Role                   |
+| --------- | ------------- | ---------------------- |
+| `tech_01` | Maya Chen     | Tooling technician     |
+| `tech_02` | Luis Reyes    | Maintenance technician |
+| `tech_03` | Priya Shah    | Quality engineer       |
+| `tech_04` | Jordan Brooks | Process engineer       |
+| `tech_05` | Sam Okafor    | Material coordinator   |
+| `tech_06` | Avery Kim     | Shift supervisor       |
 
 The roster is application seed data rather than source manufacturing data.
 
