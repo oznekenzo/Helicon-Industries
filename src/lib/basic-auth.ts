@@ -1,6 +1,8 @@
-import { timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
-type BasicAuthCredentials = {
+export const AUTH_SESSION_COOKIE = "helicon_auth_session";
+
+export type BasicAuthCredentials = {
   username: string;
   password: string;
 };
@@ -43,9 +45,40 @@ export function hasValidBasicAuthorization(
 ): boolean {
   const provided = parseBasicAuthorization(authorization);
 
+  return provided !== null && hasValidCredentials(provided, expected);
+}
+
+export function hasValidCredentials(
+  provided: BasicAuthCredentials,
+  expected: BasicAuthCredentials,
+): boolean {
   return (
-    provided !== null &&
     safeEqual(provided.username, expected.username) &&
     safeEqual(provided.password, expected.password)
+  );
+}
+
+export function getBasicAuthCredentials(): BasicAuthCredentials | null {
+  const username = process.env.BASIC_AUTH_USERNAME;
+  const password = process.env.BASIC_AUTH_PASSWORD;
+
+  return username && password ? { username, password } : null;
+}
+
+export function createAuthSessionToken({
+  username,
+  password,
+}: BasicAuthCredentials): string {
+  return createHmac("sha256", password)
+    .update(`helicon-auth-session:${username}`)
+    .digest("base64url");
+}
+
+export function hasValidAuthSession(
+  token: string | undefined,
+  expected: BasicAuthCredentials,
+): boolean {
+  return (
+    token !== undefined && safeEqual(token, createAuthSessionToken(expected))
   );
 }

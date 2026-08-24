@@ -7,12 +7,12 @@ import {
   IconClock,
   IconInbox,
   IconSearch,
-  IconSettings,
   IconTool,
   IconUserCircle,
 } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
+import { BrandLockup } from "@/components/ui/brand-lockup";
 import {
   DataStatusPopover,
   FacilityPopover,
@@ -50,15 +50,7 @@ export function AppShell({
   return (
     <main className="app-frame">
       <aside className="sidebar">
-        <div className="brand-lockup">
-          <span aria-hidden="true" className="brand-mark">
-            <IconSettings size={18} stroke={2} />
-          </span>
-          <span>
-            <strong>Helicon</strong>
-            <small>INDUSTRIES</small>
-          </span>
-        </div>
+        <BrandLockup />
         <nav aria-label="Primary navigation" className="primary-nav">
           {navItems.map(({ label, icon: IconComponent, active }) => (
             <button
