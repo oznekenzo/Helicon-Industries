@@ -233,8 +233,7 @@ function issueFor(
   asOfMs: number,
   assignmentByIssueKey: Map<string, IssueAssignment>,
 ): OperationalIssue | undefined {
-  const isActiveWip =
-    job.startedAt !== undefined && job.completedAt === undefined;
+  const isIncomplete = job.completedAt === undefined;
   let condition: OperationalIssueCondition;
   let issueKey: string;
   let detectedAt: string;
@@ -245,7 +244,7 @@ function issueFor(
     issueKey = `${condition}:${job.jobId}:${job.currentConditionEventId}`;
     detectedAt = job.currentConditionSince;
     evidenceEventIds = [job.createdEventId, job.currentConditionEventId];
-  } else if (isActiveWip && Date.parse(job.targetDueAt) < asOfMs) {
+  } else if (isIncomplete && Date.parse(job.targetDueAt) < asOfMs) {
     condition = "past_due";
     issueKey = `past_due:${job.jobId}:${job.targetDueAt}`;
     detectedAt = job.targetDueAt;
@@ -273,7 +272,7 @@ function issueFor(
     recommendedAction: recommendedActionFor(condition, job),
     evidenceEventIds: [...new Set(evidenceEventIds)],
     ...(assignment && {
-      owner: {
+      assignee: {
         responderId: assignment.responderId,
         displayName: assignment.displayName,
         role: assignment.role,
@@ -326,12 +325,20 @@ export function projectCurrentOperations(
   }
 
   const jobs = [...eventsByJob.values()].map(projectJob);
+  const incompleteJobs = jobs.filter((job) => job.completedAt === undefined);
+  const notStarted = incompleteJobs
+    .filter((job) => job.startedAt === undefined)
+    .sort(
+      (left, right) =>
+        Date.parse(left.targetDueAt) - Date.parse(right.targetDueAt) ||
+        compareJobsById(left, right),
+    );
   const activeWip = jobs
     .filter(
       (job) => job.startedAt !== undefined && job.completedAt === undefined,
     )
     .sort(compareJobsById);
-  const dueNext24Hours = activeWip
+  const dueNext24Hours = incompleteJobs
     .filter((job) => {
       const dueAt = Date.parse(job.targetDueAt);
       return dueAt > asOfMs && dueAt <= asOfMs + HOURS_24_MS;
@@ -349,7 +356,7 @@ export function projectCurrentOperations(
           Date.parse(right.currentConditionSince) ||
         compareJobsById(left, right),
     );
-  const pastDueWip = activeWip
+  const pastDueWip = incompleteJobs
     .filter((job) => Date.parse(job.targetDueAt) < asOfMs)
     .sort(
       (left, right) =>
@@ -357,32 +364,33 @@ export function projectCurrentOperations(
         Date.parse(left.targetDueAt) - Date.parse(right.targetDueAt) ||
         compareJobsById(left, right),
     );
-  const actionRequired = jobs
+  const currentIssues = incompleteJobs
     .map((job) => issueFor(job, asOfMs, assignmentByIssueKey))
     .filter((issue): issue is OperationalIssue => issue !== undefined)
     .sort(compareIssues);
-  const needsOwner = actionRequired.filter(
-    (issue) => issue.owner === undefined,
+  const needsAssignment = currentIssues.filter(
+    (issue) => issue.assignee === undefined,
   );
 
   return {
     facility: input.facility,
     asOf: input.asOf,
     counts: {
-      actionRequired: actionRequired.length,
+      needsAssignment: needsAssignment.length,
+      notStarted: notStarted.length,
       activeWip: activeWip.length,
       dueNext24Hours: dueNext24Hours.length,
       blockedOrHeld: blockedOrHeld.length,
       pastDueWip: pastDueWip.length,
-      needsOwner: needsOwner.length,
     },
+    currentIssues,
     views: {
-      actionRequired,
+      needsAssignment,
+      notStarted,
       activeWip,
       dueNext24Hours,
       blockedOrHeld,
       pastDueWip,
-      needsOwner,
     },
   };
 }

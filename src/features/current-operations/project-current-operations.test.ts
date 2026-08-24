@@ -186,8 +186,15 @@ describe("projectCurrentOperations", () => {
       facility: FACILITY,
       asOf: AS_OF,
     });
-    expect(completed.views.activeWip).toEqual([]);
-    expect(completed.views.actionRequired).toEqual([]);
+    expect(completed.counts).toEqual({
+      needsAssignment: 0,
+      notStarted: 0,
+      activeWip: 0,
+      dueNext24Hours: 0,
+      blockedOrHeld: 0,
+      pastDueWip: 0,
+    });
+    expect(completed.currentIssues).toEqual([]);
 
     const timeline = projectJobTimeline(events, {
       facility: FACILITY,
@@ -234,13 +241,13 @@ describe("projectCurrentOperations", () => {
       remainingQuantity: 38,
       currentConditionEventId: `${jobId}_hold`,
     });
-    expect(snapshot.views.actionRequired[0]).toMatchObject({
+    expect(snapshot.currentIssues[0]).toMatchObject({
       issueKey: `held:${jobId}:${jobId}_hold`,
       recommendedAction: "Review the held job",
     });
   });
 
-  it("treats a pre-start block as actionable without counting it as Active WIP", () => {
+  it("keeps a pre-start block in Not started and Blocked / held without counting it as Active WIP", () => {
     const jobId = "job_prestart_block";
     const snapshot = projectCurrentOperations(
       [created(jobId), blocked(jobId, "missing_tool")],
@@ -248,16 +255,50 @@ describe("projectCurrentOperations", () => {
     );
 
     expect(snapshot.counts).toMatchObject({
-      actionRequired: 1,
+      needsAssignment: 1,
+      notStarted: 1,
       activeWip: 0,
       blockedOrHeld: 1,
       pastDueWip: 0,
     });
-    expect(snapshot.views.actionRequired[0]).toMatchObject({
+    expect(snapshot.currentIssues[0]).toMatchObject({
       condition: "blocked",
       affectedUnits: 100,
       recommendedAction: "Locate and stage the required tool",
     });
+    expect(snapshot.views.needsAssignment[0]?.jobId).toBe(jobId);
+    expect(snapshot.views.notStarted[0]?.jobId).toBe(jobId);
+  });
+
+  it("includes incomplete not-started jobs in due and past-due views", () => {
+    const overdue = "job_not_started_overdue";
+    const dueSoon = "job_not_started_due_soon";
+    const future = "job_not_started_future";
+    const snapshot = projectCurrentOperations(
+      [
+        created(future, { dueAt: "2026-08-15T12:00:00Z" }),
+        created(dueSoon, { dueAt: "2026-08-13T18:00:00Z" }),
+        created(overdue, { dueAt: "2026-08-12T12:00:00Z" }),
+      ],
+      { facility: FACILITY, asOf: AS_OF },
+    );
+
+    expect(snapshot.views.notStarted.map((job) => job.jobId)).toEqual([
+      overdue,
+      dueSoon,
+      future,
+    ]);
+    expect(snapshot.views.activeWip).toEqual([]);
+    expect(snapshot.views.dueNext24Hours.map((job) => job.jobId)).toEqual([
+      dueSoon,
+    ]);
+    expect(snapshot.views.pastDueWip.map((job) => job.jobId)).toEqual([
+      overdue,
+    ]);
+    expect(snapshot.currentIssues).toEqual([
+      expect.objectContaining({ jobId: overdue, condition: "past_due" }),
+    ]);
+    expect(snapshot.views.needsAssignment[0]?.jobId).toBe(overdue);
   });
 
   it("uses strict due boundaries and coalesces an overdue block into one primary issue", () => {
@@ -297,7 +338,7 @@ describe("projectCurrentOperations", () => {
       blockedAndPastDue,
     ]);
     expect(
-      snapshot.views.actionRequired.filter(
+      snapshot.currentIssues.filter(
         (issue) => issue.jobId === blockedAndPastDue,
       ),
     ).toEqual([
@@ -328,13 +369,11 @@ describe("projectCurrentOperations", () => {
         { facility: FACILITY, asOf: AS_OF },
       );
 
-      expect(snapshot.views.actionRequired[0]?.recommendedAction).toBe(
-        expectedAction,
-      );
+      expect(snapshot.currentIssues[0]?.recommendedAction).toBe(expectedAction);
     },
   );
 
-  it("derives severity, ranks deterministically, and removes assigned issues from Needs owner", () => {
+  it("derives severity, ranks deterministically, and removes assigned issues from Needs assignment", () => {
     const critical = "job_critical";
     const high = "job_high";
     const medium = "job_medium";
@@ -368,23 +407,23 @@ describe("projectCurrentOperations", () => {
     });
 
     expect(
-      snapshot.views.actionRequired.map((issue) => [
-        issue.jobId,
-        issue.severity,
-      ]),
+      snapshot.currentIssues.map((issue) => [issue.jobId, issue.severity]),
     ).toEqual([
       [critical, "critical"],
       [high, "high"],
       [medium, "medium"],
       [low, "low"],
     ]);
-    expect(snapshot.views.actionRequired[0]?.owner).toMatchObject({
+    expect(snapshot.currentIssues[0]?.assignee).toMatchObject({
       responderId: "tech_01",
     });
-    expect(snapshot.views.needsOwner.map((issue) => issue.jobId)).not.toContain(
+    expect(
+      snapshot.views.needsAssignment.map((issue) => issue.jobId),
+    ).not.toContain(critical);
+    expect(snapshot.views.blockedOrHeld.map((job) => job.jobId)).toContain(
       critical,
     );
-    expect(snapshot.counts.needsOwner).toBe(3);
+    expect(snapshot.counts.needsAssignment).toBe(3);
   });
 
   it("applies the complete priority-to-severity matrix", () => {
@@ -410,10 +449,7 @@ describe("projectCurrentOperations", () => {
       asOf: AS_OF,
     });
     const severityByJob = Object.fromEntries(
-      snapshot.views.actionRequired.map((issue) => [
-        issue.jobId,
-        issue.severity,
-      ]),
+      snapshot.currentIssues.map((issue) => [issue.jobId, issue.severity]),
     );
 
     for (const [jobId, , , expectedSeverity] of cases) {
@@ -454,12 +490,52 @@ describe("projectCurrentOperations", () => {
       asOf: AS_OF,
     });
 
-    expect(snapshot.views.actionRequired.map((issue) => issue.jobId)).toEqual([
+    expect(snapshot.currentIssues.map((issue) => issue.jobId)).toEqual([
       impact,
       ageOld,
       ageNew,
       dueLater,
     ]);
+  });
+
+  it("does not transfer an assignment to a new condition episode", () => {
+    const jobId = "job_reblocked";
+    const firstBlockedEventId = `${jobId}_blocked`;
+    const secondBlockedEventId = `${jobId}_blocked_again`;
+    const events = [
+      created(jobId),
+      started(jobId),
+      blocked(jobId, "machine_fault", "2026-08-11T10:00:00Z"),
+      event({
+        eventId: `${jobId}_unblocked`,
+        eventType: "job_unblocked",
+        occurredAt: "2026-08-12T10:00:00Z",
+        jobId,
+        metadata: { reason: "resolved_machine_fault" },
+      }),
+      event({
+        eventId: secondBlockedEventId,
+        eventType: "job_blocked",
+        occurredAt: "2026-08-13T10:00:00Z",
+        jobId,
+        machineId: "press_02",
+        metadata: { reason: "machine_fault" },
+      }),
+    ];
+
+    const snapshot = projectCurrentOperations(events, {
+      facility: FACILITY,
+      asOf: AS_OF,
+      assignments: [
+        assignment(`blocked:${jobId}:${firstBlockedEventId}`, jobId),
+      ],
+    });
+
+    expect(snapshot.currentIssues[0]?.issueKey).toBe(
+      `blocked:${jobId}:${secondBlockedEventId}`,
+    );
+    expect(snapshot.currentIssues[0]).not.toHaveProperty("assignee");
+    expect(snapshot.views.needsAssignment[0]?.jobId).toBe(jobId);
   });
 
   it("filters other facilities and preserves absent optional production context", () => {
