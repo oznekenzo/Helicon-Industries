@@ -45,7 +45,6 @@ const viewDefinitions: Array<{
     label: "Needs assignment",
     sublabel: "Unassigned issues",
   },
-  { key: "not-started", label: "Not started", sublabel: "Jobs" },
   { key: "active-wip", label: "Active WIP", sublabel: "Jobs" },
   { key: "due-next-24h", label: "Due next 24h", sublabel: "Jobs" },
   {
@@ -62,6 +61,7 @@ const viewDefinitions: Array<{
     tone: "critical",
     icon: IconClockExclamation,
   },
+  { key: "not-started", label: "Not started", sublabel: "Jobs" },
 ];
 
 const viewDetails: Record<
