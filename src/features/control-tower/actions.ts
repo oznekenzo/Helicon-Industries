@@ -4,7 +4,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
 import { FACILITIES } from "@/features/manufacturing-events/types";
-import { createDatabase } from "@db/client";
+import { getRuntimeDatabase, runDatabaseRead } from "@/lib/runtime-database";
 
 import { assignControlTowerIssue, getControlTowerJobDetail } from "./data";
 import type { AssignmentResult } from "./types";
@@ -21,20 +21,11 @@ const assignmentInput = z.object({
   responderId: z.string().min(1),
 });
 
-function connectionString() {
-  const value = process.env.DATABASE_URL;
-  if (!value) throw new Error("DATABASE_URL is not configured.");
-  return value;
-}
-
 export async function loadJobDetailAction(input: unknown) {
   const parsed = detailInput.parse(input);
-  const { client, db } = createDatabase(connectionString());
-  try {
-    return await getControlTowerJobDetail(db, parsed.facility, parsed.jobId);
-  } finally {
-    await client.end();
-  }
+  return runDatabaseRead((db) =>
+    getControlTowerJobDetail(db, parsed.facility, parsed.jobId),
+  );
 }
 
 export async function assignIssueAction(
@@ -45,7 +36,7 @@ export async function assignIssueAction(
     return { ok: false, message: "The assignment request was invalid." };
   }
 
-  const { client, db } = createDatabase(connectionString());
+  const db = getRuntimeDatabase();
   try {
     const result = await assignControlTowerIssue(db, parsed.data);
     revalidateTag("control-tower", { expire: 0 });
@@ -60,7 +51,5 @@ export async function assignIssueAction(
       ok: false,
       message: error instanceof Error ? error.message : "Assignment failed.",
     };
-  } finally {
-    await client.end();
   }
 }

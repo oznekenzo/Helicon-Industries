@@ -5,6 +5,8 @@ import * as schema from "./schema";
 
 export function createDatabase(connectionString: string) {
   const client = postgres(connectionString, {
+    connect_timeout: 8,
+    idle_timeout: 20,
     max: 1,
     prepare: false,
   });

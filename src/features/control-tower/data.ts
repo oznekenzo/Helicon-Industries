@@ -23,6 +23,7 @@ import type {
   NormalizedManufacturingEvent,
   Priority,
 } from "@/features/manufacturing-events";
+import type { EventType } from "@/features/manufacturing-events/types";
 import type { HeliconDatabase } from "@db/client";
 import {
   eventImports,
@@ -43,6 +44,17 @@ import type {
   Severity,
   TimelineEvent,
 } from "./types";
+
+const CONTROL_TOWER_EVENT_TYPES = [
+  "job_created",
+  "tool_ready",
+  "job_started",
+  "cycle_completed",
+  "job_blocked",
+  "job_unblocked",
+  "job_hold",
+  "job_completed",
+] satisfies EventType[];
 
 function conditionForJob(job: JobSnapshot, asOf: string): JobCondition {
   if (job.state === "blocked") return "blocked";
@@ -237,12 +249,14 @@ export async function getControlTowerPageData(
   facility: Facility,
 ): Promise<ControlTowerPageData> {
   const asOf = await resolveFacilityAsOf(db, facility);
-  const [events, assignments, roster, importQuality] = await Promise.all([
-    listManufacturingEvents(db, { facility, asOf }),
-    loadAssignments(db),
-    loadResponders(db),
-    loadImportQuality(db),
-  ]);
+  const events = await listManufacturingEvents(db, {
+    facility,
+    asOf,
+    eventTypes: CONTROL_TOWER_EVENT_TYPES,
+  });
+  const assignments = await loadAssignments(db);
+  const roster = await loadResponders(db);
+  const importQuality = await loadImportQuality(db);
   const performance = calculateFacilityPerformance(events, { facility, asOf });
   const operations = projectCurrentOperations(events, {
     facility,
