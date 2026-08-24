@@ -212,6 +212,15 @@ describe("ControlTowerScreen", () => {
         .getAttribute("aria-selected"),
     ).toBe("true");
 
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
+      "Needs assignment1Unassigned issues",
+      "Active WIP1Jobs",
+      "Due next 24h0Jobs",
+      "Blocked / Held1Jobs",
+      "Past due WIP1Jobs",
+      "Not started0Jobs",
+    ]);
+
     for (const name of [
       /Not started/,
       /Active WIP/,
