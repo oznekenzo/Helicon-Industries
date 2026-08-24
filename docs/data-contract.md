@@ -179,6 +179,10 @@ The latest accepted state-transition event determines the reconstructed state. J
 
 ## Facility measures
 
+Facility measures use the first accepted `job_completed` event for each Job at or before the selected as-of timestamp. Job completion is terminal, so later completion events for the same Job do not add output twice.
+
+The 7-day and 14-day windows are equal rolling periods. The current period is `(as_of - duration, as_of]`; the prior period is the immediately preceding period of the same duration. Daily production values use consecutive 24-hour buckets aligned to the as-of timestamp. All-time measures include every canonical completion through the as-of timestamp and have no fabricated prior comparison.
+
 ### On-time completion
 
 ```text
@@ -190,10 +194,10 @@ Jobs completed in the measurement period
 ### Good units produced
 
 ```text
-sum(job_completed.metadata.good_quantity)
+sum(canonical job_completed.metadata.good_quantity)
 ```
 
-The sum includes Jobs completed in the measurement period.
+The sum includes Jobs whose canonical completion occurred in the measurement period.
 
 ### Production yield
 
@@ -203,7 +207,7 @@ sum(good_quantity)
 sum(good_quantity + scrap_quantity)
 ```
 
-The calculation uses `job_completed` events in the measurement period.
+The calculation uses canonical completion events in the measurement period. On-time completion and Production Yield are absent when their denominators are zero. Percentage change in Good Units Produced is absent when the prior period is zero.
 
 ## Current operating conditions
 
