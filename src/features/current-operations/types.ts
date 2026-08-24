@@ -38,14 +38,14 @@ export type JobSnapshot = {
   sourceEventIds: string[];
 };
 
-export type IssueOwner = {
+export type IssueAssignee = {
   responderId: string;
   displayName: string;
   role: string;
   assignedAt: string;
 };
 
-export type IssueAssignment = IssueOwner & {
+export type IssueAssignment = IssueAssignee & {
   issueKey: string;
   jobId: string;
 };
@@ -61,30 +61,31 @@ export type OperationalIssue = {
   dueAt: string;
   recommendedAction: string;
   evidenceEventIds: string[];
-  owner?: IssueOwner;
+  assignee?: IssueAssignee;
   job: JobSnapshot;
 };
 
 export type CurrentOperationsCounts = {
-  actionRequired: number;
+  needsAssignment: number;
+  notStarted: number;
   activeWip: number;
   dueNext24Hours: number;
   blockedOrHeld: number;
   pastDueWip: number;
-  needsOwner: number;
 };
 
 export type CurrentOperationsSnapshot = {
   facility: Facility;
   asOf: string;
   counts: CurrentOperationsCounts;
+  currentIssues: OperationalIssue[];
   views: {
-    actionRequired: OperationalIssue[];
+    needsAssignment: OperationalIssue[];
+    notStarted: JobSnapshot[];
     activeWip: JobSnapshot[];
     dueNext24Hours: JobSnapshot[];
     blockedOrHeld: JobSnapshot[];
     pastDueWip: JobSnapshot[];
-    needsOwner: OperationalIssue[];
   };
 };
 

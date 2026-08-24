@@ -77,13 +77,13 @@ export async function getCurrentOperations(
     facility: query.facility,
     asOf,
   });
-  const withoutOwners = projectCurrentOperations(events, {
+  const withoutAssignments = projectCurrentOperations(events, {
     facility: query.facility,
     asOf,
   });
   const assignments = await loadAssignments(
     db,
-    withoutOwners.views.actionRequired.map((issue) => issue.issueKey),
+    withoutAssignments.currentIssues.map((issue) => issue.issueKey),
   );
 
   return projectCurrentOperations(events, {
@@ -132,7 +132,7 @@ export async function assignOperationalIssue(
   const snapshot = await getCurrentOperations(db, {
     facility: input.facility,
   });
-  const issue = snapshot.views.actionRequired.find(
+  const issue = snapshot.currentIssues.find(
     (candidate) => candidate.issueKey === input.issueKey,
   );
 

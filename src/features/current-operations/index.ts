@@ -17,7 +17,7 @@ export type {
   CurrentOperationsCounts,
   CurrentOperationsSnapshot,
   IssueAssignment,
-  IssueOwner,
+  IssueAssignee,
   IssueSeverity,
   JobSnapshot,
   JobState,
