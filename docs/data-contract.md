@@ -221,22 +221,13 @@ An Active WIP Job whose `target_due_at` is after the as-of timestamp and no more
 
 An incomplete Job whose latest accepted relevant state event is `job_blocked` or `job_hold`.
 
-### Delivery Risk
+### Past Due WIP
 
-Delivery Risk is derived; it is not present in the source. The initial deterministic rule includes:
-
-- Active WIP already past `target_due_at`
-- blocked or held Active WIP due within the next 24 hours
-
-Additional pace-based classification requires a separately defined and tested rule.
+An Active WIP Job whose `target_due_at` is earlier than the as-of timestamp. This is a deterministic lateness condition, not predictive risk scoring.
 
 ### Needs Owner
 
-An unresolved Operational Issue whose Response Record has no `ownerId`.
-
-### Attention
-
-The complete set of unresolved Operational Issues worth monitoring.
+An Action Required Operational Issue whose current issue episode has no Assignment Record.
 
 ### Action Required
 
@@ -245,44 +236,44 @@ An Operational Issue classified by a deterministic triage rule as requiring inte
 - a currently blocked or held Job
 - an Active WIP Job already past `target_due_at`
 
-Quality, cycle-time, Tool, Material, Machine, and sensor conditions require separately defined thresholds before they can be classified as Action Required.
+When conditions overlap, a current blocked or held condition takes precedence over Past Due WIP so the Priority Worklist contains one Operational Issue per Job. Quality, cycle-time, Tool, Material, Machine, and sensor patterns require separately defined thresholds before they can be classified as Action Required.
 
 ## Operational issue
 
 ```ts
 type OperationalIssue = {
-  issueId: string;
-  jobId?: string;
-  category:
-    | "delivery_risk"
-    | "blocked"
-    | "quality"
-    | "cycle_time"
-    | "tooling"
-    | "material"
-    | "sensor";
+  issueKey: string;
+  jobId: string;
+  condition: "blocked" | "held" | "past_due";
   severity: "critical" | "high" | "medium" | "low";
-  summary: string;
-  requiredAction?: string;
+  recommendedAction: string;
   detectedAt: string;
-  actionRequired: boolean;
   evidenceEventIds: string[];
-  affectedUnits?: number;
-  dueAt?: string;
+  affectedUnits: number;
+  dueAt: string;
 };
 
-type ResponseRecord = {
-  issueId: string;
-  ownerId?: string;
-  assignedAt?: string;
-  acknowledgedAt?: string;
-  latestUpdate?: string;
-  latestUpdateAt?: string;
-  resolvedAt?: string;
+type AssignmentRecord = {
+  issueKey: string;
+  jobId: string;
+  responderId: string;
+  assignedAt: string;
 };
 ```
 
-Every Operational Issue references Source Fact evidence. Category, severity, Required Action, Action Required, and Delivery Risk are Derived Signals. A Response Record contains only explicit application-created Workflow Facts. There is no generic `open` or `in_progress` status.
+Every Operational Issue references Source Fact evidence. Condition, severity, Recommended Action, Action Required, and Past Due WIP are Derived Signals. An Assignment Record contains only explicit application-created Workflow Facts. There is no generic `open` or `in_progress` status, acknowledgment, latest response, or response history.
+
+Issue keys identify a specific condition episode:
+
+- `blocked:<job_id>:<job_blocked_event_id>`
+- `held:<job_id>:<job_hold_event_id>`
+- `past_due:<job_id>:<target_due_at>`
+
+Assignments do not silently transfer when a new condition episode begins. Resolved assignments remain stored but do not appear in current operating views.
+
+Severity is deterministic. Blocked or held Jobs map source priority `high` to Critical, `normal` to High, and `low` to Medium. Past Due WIP maps source priority `high` to High, `normal` to Medium, and `low` to Low.
+
+The Priority Worklist ranks by severity, remaining units, due time, condition age, and Job ID. Remaining units are `max(target_quantity - sum(cycle_completed.quantity), 0)` at the selected timestamp.
 
 ## Data-quality observations
 

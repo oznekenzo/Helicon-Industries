@@ -31,8 +31,7 @@ The current operating conditions are:
 - Active WIP
 - Jobs due within 24 hours
 - Blocked or held Jobs
-- Delivery Risk
-- Attention
+- Past Due WIP
 - Action Required
 - Operational Issues that Need Owner
 
@@ -47,11 +46,10 @@ The product scope includes:
 - reconstructing current Job state from chronological events
 - calculating facility outcomes and current operating conditions
 - deriving evidence-backed Operational Issues
-- placing Action Required issues first in the Priority Worklist
-- showing a condition-specific Required Action instead of a generic status
+- ranking Action Required issues in the Priority Worklist
+- showing a condition-specific Recommended Action instead of a generic status
 - assigning or reassigning an Owner
-- recording assignment time, acknowledgment time, the latest response update, and resolution time
-- showing concise response history
+- recording the current assignment time for each Operational Issue episode
 - inspecting Job, Machine, Tool, Inspection, and event evidence supported by the source
 - importing or re-importing an event file through a protected workflow
 
@@ -61,7 +59,7 @@ Every product value belongs to one of three layers:
 
 1. **Source Fact** — present in a Manufacturing Event.
 2. **Derived Signal** — reproducibly calculated from Source Facts.
-3. **Workflow Fact** — explicitly recorded by the application during ownership and response.
+3. **Workflow Fact** — explicitly recorded by the application during assignment.
 
 Source Facts remain distinguishable from Derived Signals and Workflow Facts.
 
@@ -98,6 +96,7 @@ The supplied data does not support:
 - inventory balances
 - technician schedules, availability, or location
 - messaging, notifications, or paging
+- acknowledgments, comments, response updates, or response history
 - customer names beyond the supplied customer IDs
 - geographic analysis
 - causal claims about Tools, Machines, Materials, Operators, or Inspectors

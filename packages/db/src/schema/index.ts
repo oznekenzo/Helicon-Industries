@@ -4,3 +4,4 @@ export {
   manufacturingEvents,
   rawEventRecords,
 } from "./manufacturing-events";
+export { operationalIssueAssignments, responders } from "./operations";

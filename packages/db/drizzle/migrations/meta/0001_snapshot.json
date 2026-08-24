@@ -1,0 +1,826 @@
+{
+  "id": "b7d809da-ed33-4ea4-adb2-01be92d32555",
+  "prevId": "1f7c1a7d-9240-42aa-966a-6216ca97be5e",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.event_import_issues": {
+      "name": "event_import_issues",
+      "schema": "",
+      "columns": {
+        "import_id": {
+          "name": "import_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "line_number": {
+          "name": "line_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "details": {
+          "name": "details",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "event_import_issues_code_idx": {
+          "name": "event_import_issues_code_idx",
+          "columns": [
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "event_import_issues_source_record_fk": {
+          "name": "event_import_issues_source_record_fk",
+          "tableFrom": "event_import_issues",
+          "tableTo": "raw_event_records",
+          "columnsFrom": [
+            "import_id",
+            "line_number"
+          ],
+          "columnsTo": [
+            "import_id",
+            "line_number"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "event_import_issues_import_id_line_number_code_pk": {
+          "name": "event_import_issues_import_id_line_number_code_pk",
+          "columns": [
+            "import_id",
+            "line_number",
+            "code"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "event_import_issues_code_check": {
+          "name": "event_import_issues_code_check",
+          "value": "\"event_import_issues\".\"code\" in ('invalid_json', 'invalid_event', 'identical_duplicate', 'conflicting_duplicate')"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.event_imports": {
+      "name": "event_imports",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "source_name": {
+          "name": "source_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_fingerprint": {
+          "name": "source_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'processing'"
+        },
+        "total_line_count": {
+          "name": "total_line_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "accepted_event_count": {
+          "name": "accepted_event_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "invalid_line_count": {
+          "name": "invalid_line_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "identical_duplicate_count": {
+          "name": "identical_duplicate_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "conflicting_duplicate_count": {
+          "name": "conflicting_duplicate_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "report": {
+          "name": "report",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "event_imports_source_fingerprint_unique": {
+          "name": "event_imports_source_fingerprint_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "source_fingerprint"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "event_imports_source_fingerprint_check": {
+          "name": "event_imports_source_fingerprint_check",
+          "value": "\"event_imports\".\"source_fingerprint\" ~ '^[a-f0-9]{64}$'"
+        },
+        "event_imports_status_check": {
+          "name": "event_imports_status_check",
+          "value": "\"event_imports\".\"status\" in ('processing', 'completed')"
+        },
+        "event_imports_total_line_count_check": {
+          "name": "event_imports_total_line_count_check",
+          "value": "\"event_imports\".\"total_line_count\" >= 0"
+        },
+        "event_imports_accepted_event_count_check": {
+          "name": "event_imports_accepted_event_count_check",
+          "value": "\"event_imports\".\"accepted_event_count\" >= 0"
+        },
+        "event_imports_invalid_line_count_check": {
+          "name": "event_imports_invalid_line_count_check",
+          "value": "\"event_imports\".\"invalid_line_count\" >= 0"
+        },
+        "event_imports_identical_duplicate_count_check": {
+          "name": "event_imports_identical_duplicate_count_check",
+          "value": "\"event_imports\".\"identical_duplicate_count\" >= 0"
+        },
+        "event_imports_conflicting_duplicate_count_check": {
+          "name": "event_imports_conflicting_duplicate_count_check",
+          "value": "\"event_imports\".\"conflicting_duplicate_count\" >= 0"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.manufacturing_events": {
+      "name": "manufacturing_events",
+      "schema": "",
+      "columns": {
+        "event_id": {
+          "name": "event_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_id": {
+          "name": "job_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "part_id": {
+          "name": "part_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "material": {
+          "name": "material",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "facility": {
+          "name": "facility",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "priority": {
+          "name": "priority",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "target_due_at": {
+          "name": "target_due_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "target_quantity": {
+          "name": "target_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "unit_price_estimate": {
+          "name": "unit_price_estimate",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tool_id": {
+          "name": "tool_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operator_id": {
+          "name": "operator_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cycle_time_seconds": {
+          "name": "cycle_time_seconds",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "defect_code": {
+          "name": "defect_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inspector_id": {
+          "name": "inspector_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "good_quantity": {
+          "name": "good_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scrap_quantity": {
+          "name": "scrap_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lot_id": {
+          "name": "lot_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "signal": {
+          "name": "signal",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload_fingerprint": {
+          "name": "payload_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_import_id": {
+          "name": "source_import_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_line": {
+          "name": "source_line",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "manufacturing_events_occurred_at_idx": {
+          "name": "manufacturing_events_occurred_at_idx",
+          "columns": [
+            {
+              "expression": "occurred_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "manufacturing_events_job_timeline_idx": {
+          "name": "manufacturing_events_job_timeline_idx",
+          "columns": [
+            {
+              "expression": "job_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "occurred_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "source_line",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "manufacturing_events_facility_type_idx": {
+          "name": "manufacturing_events_facility_type_idx",
+          "columns": [
+            {
+              "expression": "facility",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "event_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "manufacturing_events_machine_idx": {
+          "name": "manufacturing_events_machine_idx",
+          "columns": [
+            {
+              "expression": "machine_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"manufacturing_events\".\"machine_id\" is not null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "manufacturing_events_tool_idx": {
+          "name": "manufacturing_events_tool_idx",
+          "columns": [
+            {
+              "expression": "tool_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"manufacturing_events\".\"tool_id\" is not null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "manufacturing_events_source_record_fk": {
+          "name": "manufacturing_events_source_record_fk",
+          "tableFrom": "manufacturing_events",
+          "tableTo": "raw_event_records",
+          "columnsFrom": [
+            "source_import_id",
+            "source_line"
+          ],
+          "columnsTo": [
+            "import_id",
+            "line_number"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "manufacturing_events_event_type_check": {
+          "name": "manufacturing_events_event_type_check",
+          "value": "\"manufacturing_events\".\"event_type\" in ('job_created', 'tool_ready', 'job_started', 'cycle_completed', 'inspection_passed', 'inspection_failed', 'job_blocked', 'job_unblocked', 'job_hold', 'job_completed', 'maintenance_ping', 'material_lot_scan', 'sensor_glitch', 'shift_handoff')"
+        },
+        "manufacturing_events_quantity_check": {
+          "name": "manufacturing_events_quantity_check",
+          "value": "\"manufacturing_events\".\"quantity\" >= 0"
+        },
+        "manufacturing_events_facility_check": {
+          "name": "manufacturing_events_facility_check",
+          "value": "\"manufacturing_events\".\"facility\" in ('la_01', 'la_02')"
+        },
+        "manufacturing_events_priority_check": {
+          "name": "manufacturing_events_priority_check",
+          "value": "\"manufacturing_events\".\"priority\" is null or \"manufacturing_events\".\"priority\" in ('low', 'normal', 'high')"
+        },
+        "manufacturing_events_target_quantity_check": {
+          "name": "manufacturing_events_target_quantity_check",
+          "value": "\"manufacturing_events\".\"target_quantity\" is null or \"manufacturing_events\".\"target_quantity\" > 0"
+        },
+        "manufacturing_events_unit_price_estimate_check": {
+          "name": "manufacturing_events_unit_price_estimate_check",
+          "value": "\"manufacturing_events\".\"unit_price_estimate\" is null or \"manufacturing_events\".\"unit_price_estimate\" >= 0"
+        },
+        "manufacturing_events_cycle_time_seconds_check": {
+          "name": "manufacturing_events_cycle_time_seconds_check",
+          "value": "\"manufacturing_events\".\"cycle_time_seconds\" is null or \"manufacturing_events\".\"cycle_time_seconds\" > 0"
+        },
+        "manufacturing_events_defect_code_check": {
+          "name": "manufacturing_events_defect_code_check",
+          "value": "\"manufacturing_events\".\"defect_code\" is null or \"manufacturing_events\".\"defect_code\" in ('voids', 'delamination', 'dimensional', 'surface', 'resin_rich', 'other')"
+        },
+        "manufacturing_events_reason_check": {
+          "name": "manufacturing_events_reason_check",
+          "value": "\"manufacturing_events\".\"reason\" is null or \"manufacturing_events\".\"reason\" in ('missing_tool', 'material_wait', 'engineering_hold', 'awaiting_qc', 'machine_fault', 'resolved_missing_tool', 'resolved_material_wait', 'resolved_engineering_hold', 'resolved_awaiting_qc', 'resolved_machine_fault')"
+        },
+        "manufacturing_events_good_quantity_check": {
+          "name": "manufacturing_events_good_quantity_check",
+          "value": "\"manufacturing_events\".\"good_quantity\" is null or \"manufacturing_events\".\"good_quantity\" >= 0"
+        },
+        "manufacturing_events_scrap_quantity_check": {
+          "name": "manufacturing_events_scrap_quantity_check",
+          "value": "\"manufacturing_events\".\"scrap_quantity\" is null or \"manufacturing_events\".\"scrap_quantity\" >= 0"
+        },
+        "manufacturing_events_signal_check": {
+          "name": "manufacturing_events_signal_check",
+          "value": "\"manufacturing_events\".\"signal\" is null or \"manufacturing_events\".\"signal\" in ('temp', 'pressure', 'platen')"
+        },
+        "manufacturing_events_payload_fingerprint_check": {
+          "name": "manufacturing_events_payload_fingerprint_check",
+          "value": "\"manufacturing_events\".\"payload_fingerprint\" ~ '^[a-f0-9]{64}$'"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.operational_issue_assignments": {
+      "name": "operational_issue_assignments",
+      "schema": "",
+      "columns": {
+        "issue_key": {
+          "name": "issue_key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "job_id": {
+          "name": "job_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "responder_id": {
+          "name": "responder_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assigned_at": {
+          "name": "assigned_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "operational_issue_assignments_responder_idx": {
+          "name": "operational_issue_assignments_responder_idx",
+          "columns": [
+            {
+              "expression": "responder_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "operational_issue_assignments_responder_id_responders_id_fk": {
+          "name": "operational_issue_assignments_responder_id_responders_id_fk",
+          "tableFrom": "operational_issue_assignments",
+          "tableTo": "responders",
+          "columnsFrom": [
+            "responder_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "operational_issue_assignments_issue_key_check": {
+          "name": "operational_issue_assignments_issue_key_check",
+          "value": "length(\"operational_issue_assignments\".\"issue_key\") > 0"
+        },
+        "operational_issue_assignments_job_id_check": {
+          "name": "operational_issue_assignments_job_id_check",
+          "value": "length(\"operational_issue_assignments\".\"job_id\") > 0"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.raw_event_records": {
+      "name": "raw_event_records",
+      "schema": "",
+      "columns": {
+        "import_id": {
+          "name": "import_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "line_number": {
+          "name": "line_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw_line": {
+          "name": "raw_line",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw_payload": {
+          "name": "raw_payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload_fingerprint": {
+          "name": "payload_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "disposition": {
+          "name": "disposition",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "raw_event_records_event_id_idx": {
+          "name": "raw_event_records_event_id_idx",
+          "columns": [
+            {
+              "expression": "event_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"raw_event_records\".\"event_id\" is not null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "raw_event_records_import_id_event_imports_id_fk": {
+          "name": "raw_event_records_import_id_event_imports_id_fk",
+          "tableFrom": "raw_event_records",
+          "tableTo": "event_imports",
+          "columnsFrom": [
+            "import_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "raw_event_records_import_id_line_number_pk": {
+          "name": "raw_event_records_import_id_line_number_pk",
+          "columns": [
+            "import_id",
+            "line_number"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "raw_event_records_line_number_check": {
+          "name": "raw_event_records_line_number_check",
+          "value": "\"raw_event_records\".\"line_number\" > 0"
+        },
+        "raw_event_records_payload_fingerprint_check": {
+          "name": "raw_event_records_payload_fingerprint_check",
+          "value": "\"raw_event_records\".\"payload_fingerprint\" is null or \"raw_event_records\".\"payload_fingerprint\" ~ '^[a-f0-9]{64}$'"
+        },
+        "raw_event_records_disposition_check": {
+          "name": "raw_event_records_disposition_check",
+          "value": "\"raw_event_records\".\"disposition\" in ('blank', 'accepted', 'invalid_json', 'invalid_event', 'identical_duplicate', 'conflicting_duplicate')"
+        }
+      },
+      "isRLSEnabled": true
+    },
+    "public.responders": {
+      "name": "responders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "responders_id_check": {
+          "name": "responders_id_check",
+          "value": "length(\"responders\".\"id\") > 0"
+        },
+        "responders_display_name_check": {
+          "name": "responders_display_name_check",
+          "value": "length(\"responders\".\"display_name\") > 0"
+        },
+        "responders_role_check": {
+          "name": "responders_role_check",
+          "value": "length(\"responders\".\"role\") > 0"
+        }
+      },
+      "isRLSEnabled": true
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
