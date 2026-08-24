@@ -1,22 +1,78 @@
 # Helicon Industries
 
-A manufacturing control tower prototype built on a synthetic event log. It reconstructs Job conditions, measures facility performance, and prioritizes evidence-backed Operational Issues that require a response.
+A manufacturing control tower prototype built on a synthetic event log.
 
-## Product definition
+## Table of contents
 
+- [Project brief](#project-brief)
+- [Stack](#stack)
+- [Prototype versus production](#prototype-versus-production)
+- [Assumptions](#assumptions)
+- [Changes and additions to the supplied data](#changes-and-additions-to-the-supplied-data)
+- [Development](#development)
+- [Deployment](#deployment)
+- [Process](#process)
+- [What's next](#whats-next)
 - [Domain language](./CONTEXT.md)
 - [Control Tower scope](./docs/control-tower-scope.md)
 - [Manufacturing Event data contract](./docs/data-contract.md)
 
+## Project brief
+
+```yaml
+Attached is a ~20k-row synthetic manufacturing event log. I'll share password to access 1 hour before your slot.
+Goal: Build the most useful product you can on top of it in no more than 4 hours. Full freedom to manipulate schema + data + anything else.
+Deliverables:
+- deployed URL + basic auth password
+- repo access (commit history)
+- short README: stack, decisions made
+- optional: anything else used during the process (sketches, notes)
+Full path is fine: ingest → model → API → UI → deploy.
+```
+
 ## Stack
 
-- Next.js 16 with the App Router
-- React 19
-- TypeScript
-- Tailwind CSS 4
-- ESLint with recommended JSX accessibility rules
-- Prettier
-- pnpm
+- Next.js 16, React 19, and TypeScript
+- Supabase Postgres with Drizzle ORM and generated migrations
+- Zod for event validation
+- Tailwind CSS 4, plus shared CSS in the current UI implementation
+- Radix UI and Tabler Icons
+- Vercel for Preview and Production deployments
+- Vitest, Testing Library, ESLint, jsx-a11y, and Prettier
+- Server-side Basic Auth with an HTTP-only session cookie
+
+## Prototype versus production
+
+| Prototype                      | Production                                                                              |
+| ------------------------------ | --------------------------------------------------------------------------------------- |
+| Historical JSONL file import   | Continuous MES and machine integrations through a queue or event broker                 |
+| Runtime TypeScript projections | Incremental read models, caching, and background processing                             |
+| One Supabase Postgres database | Partitioning, retention, backups, monitoring, and separate analytical storage as needed |
+| Shared Basic Auth credential   | SSO, individual users, RBAC, and facility-level authorization                           |
+| One Next.js deployment         | Separately scalable ingestion, API, and web workloads when volume requires it           |
+
+Next.js, Postgres, TypeScript, and Drizzle could remain; production mainly adds continuous ingestion, precomputation, security, and operational controls.
+
+## Assumptions
+
+- The file is a historical snapshot, not a live stream.
+- The latest accepted facility event is the default `asOf` timestamp.
+- The first valid occurrence of an `event_id` wins; later duplicates are recorded.
+- The first Job completion is terminal.
+- Blocks end on unblock or completion; holds end on completion because no release event exists.
+- Cycle quantities represent produced units; completion metadata supplies good and scrap units.
+- Missing optional values remain missing.
+- Operational views, severity, ranking, and Recommended Actions are deterministic Derived Signals.
+- Assignments belong to a specific issue episode and do not transfer to a later episode.
+
+## Changes and additions to the supplied data
+
+- Raw lines and payloads are preserved with fingerprints and validation results.
+- Valid events are normalized into typed, queryable Postgres columns.
+- Identical and conflicting duplicate IDs are recorded; conflicting later payloads do not replace the first valid event.
+- Job state, operational views, issues, and facility metrics are derived at runtime and are not written back as source facts.
+- Six prototype Responders and issue assignments were added as separate application-owned workflow data.
+- The supplied event payloads were not edited or supplemented with invented values.
 
 ## Development
 
@@ -26,27 +82,38 @@ cp .env.example .env
 pnpm dev
 ```
 
-The application requires `BASIC_AUTH_USERNAME` and `BASIC_AUTH_PASSWORD` in
-every environment. Requests fail closed when either value is missing.
-
-Run all static checks:
-
-```bash
-pnpm check
-```
+Run all checks with `pnpm check`.
 
 ## Deployment
 
-The existing Vercel project is `helicon-industries`. Configure
-`BASIC_AUTH_USERNAME`, `BASIC_AUTH_PASSWORD`, and the pooled `DATABASE_URL` for
-both Preview and Production. `DIRECT_DATABASE_URL` is only for local migrations
-and must not be added to the deployed application.
+The Vercel project requires pooled `DATABASE_URL`, `BASIC_AUTH_USERNAME`, and `BASIC_AUTH_PASSWORD`. `DIRECT_DATABASE_URL` is only for local migrations.
 
-```bash
-vercel link --project helicon-industries
-vercel
-vercel --prod
-```
+## Process
 
-Verify that each deployment returns `401 Unauthorized` without credentials and
-loads normally with the configured Basic Auth username and password.
+- context
+- understand data
+- user journey
+- user goals
+- figure out priorities
+- understand domains and stack
+- understand layout and visual hierarchy
+- first design pass - adjust & refine
+- share design with code ai
+- find middle ground - some features were easily buildable and worth it
+- lock in design
+- update code to match worth-it design features
+- build backend
+- build frontend
+- test + performance
+- add documentation
+
+## What's next
+
+- kpi against target - compare top level factory stats against declared company wide north star performance targets
+- tool insights analytics - create insights of low performing tools creating higher than normal scrap parts
+- column cleanup - column ordering is a bit unorganized / inconsistent between current operations focused state
+- motion pass - a little goes a long way
+- accessibility pass
+- strict design system
+- more comprehensive testing
+- convert to tailwind
