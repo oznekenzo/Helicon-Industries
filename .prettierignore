@@ -1,3 +1,4 @@
+packages/db/drizzle/migrations/meta/
 .next
 node_modules
 pnpm-lock.yaml
