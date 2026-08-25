@@ -58,8 +58,3 @@ export type CalculateFacilityPerformanceInput = {
   facility: Facility;
   asOf: string;
 };
-
-export type FacilityPerformanceQuery = {
-  facility: Facility;
-  asOf?: string;
-};

@@ -370,6 +370,80 @@ input:focus-visible,
   cursor: default;
 }
 
+.dashboard-error-page {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  padding: 40px 48px;
+  background: var(--canvas);
+}
+
+.dashboard-error-page__brand.brand-lockup {
+  padding: 0;
+}
+
+.dashboard-error-card {
+  width: min(440px, 100%);
+  margin: auto;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  box-shadow: var(--shadow-overlay);
+}
+
+.dashboard-error-card__icon {
+  display: inline-flex;
+  color: var(--critical);
+}
+
+.dashboard-error-card__eyebrow {
+  margin: 16px 0 0;
+  color: var(--critical);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dashboard-error-card h1 {
+  margin: 8px 0 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.dashboard-error-card__message {
+  margin: 10px 0 0;
+  color: var(--secondary);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.dashboard-error-card__reference {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+}
+
+.dashboard-error-card__retry {
+  margin-top: 22px;
+  padding: 9px 16px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--canvas);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dashboard-error-card__retry:hover {
+  background: var(--ink);
+}
+
 @media (max-width: 900px) {
   .auth-context {
     display: none;
@@ -379,6 +453,10 @@ input:focus-visible,
     width: 100%;
     min-height: 100dvh;
     padding: 32px 24px;
+  }
+
+  .dashboard-error-page {
+    padding: 28px 24px;
   }
 }
 
