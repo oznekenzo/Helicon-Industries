@@ -357,7 +357,10 @@ export function projectCurrentOperations(
         compareJobsById(left, right),
     );
   const pastDueWip = incompleteJobs
-    .filter((job) => Date.parse(job.targetDueAt) < asOfMs)
+    .filter(
+      (job) =>
+        job.startedAt !== undefined && Date.parse(job.targetDueAt) < asOfMs,
+    )
     .sort(
       (left, right) =>
         right.remainingQuantity - left.remainingQuantity ||

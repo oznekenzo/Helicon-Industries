@@ -2,7 +2,7 @@
 
 ## Goal
 
-Help a production manager or shift supervisor understand whether a facility is producing usable output on time, identify the Jobs that require intervention, inspect the supporting evidence, and establish ownership of the response.
+Help a production manager or shift supervisor understand whether a facility is producing usable output on time, identify the Jobs that require intervention, inspect the supporting evidence, and assign a Responder.
 
 ## Primary user
 
@@ -12,7 +12,7 @@ The primary user is responsible for facility-wide production outcomes and operat
 2. What is happening in production now?
 3. Which Jobs require intervention?
 4. What evidence explains the condition?
-5. Who owns the response?
+5. Which Operational Issues still need a Responder?
 
 ## Facility outcomes
 
@@ -28,12 +28,12 @@ These measures describe delivery, usable volume, and production quality respecti
 
 The current operating conditions are:
 
+- Operational Issues that Need Assignment
+- Not Started Jobs
 - Active WIP
 - Jobs due within 24 hours
 - Blocked or held Jobs
 - Past Due WIP
-- Action Required
-- Operational Issues that Need Owner
 
 The conditions may overlap and are not additive categories.
 
@@ -46,12 +46,11 @@ The product scope includes:
 - reconstructing current Job state from chronological events
 - calculating facility outcomes and current operating conditions
 - deriving evidence-backed Operational Issues
-- ranking Action Required issues in the Priority Worklist
+- ranking Needs Assignment issues by severity and operational impact
 - showing a condition-specific Recommended Action instead of a generic status
-- assigning or reassigning an Owner
+- assigning or reassigning a Responder
 - recording the current assignment time for each Operational Issue episode
 - inspecting Job, Machine, Tool, Inspection, and event evidence supported by the source
-- importing or re-importing an event file through a protected workflow
 
 ## Truth boundaries
 
@@ -65,7 +64,7 @@ Source Facts remain distinguishable from Derived Signals and Workflow Facts.
 
 ## Prototype responder roster
 
-The event log contains Operator and Inspector IDs but no technician roster. The prototype adds these Responders for Operational Issue ownership:
+The event log contains Operator and Inspector IDs but no technician roster. The prototype adds these Responders for Operational Issue assignment:
 
 | ID        | Display name  | Role                   |
 | --------- | ------------- | ---------------------- |
@@ -80,7 +79,7 @@ The roster is application seed data rather than source manufacturing data.
 
 ## Authentication and access
 
-The deployed prototype is protected by a single demo password. User management, organization administration, and role-based permissions are outside the prototype scope.
+The deployed prototype uses one shared credential. Unauthenticated browser requests to protected pages redirect to the sign-in page; unauthenticated API-style requests receive `401`. User management and role-based permissions are outside the prototype scope.
 
 ## Excluded capabilities
 
@@ -103,7 +102,3 @@ The supplied data does not support:
 - a claim that the static event file is a live stream
 
 Absent values remain absent rather than being fabricated.
-
-## Deferred work
-
-UI implementation is deferred until the approved design system and Control Tower design are available.

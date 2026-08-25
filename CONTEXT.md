@@ -48,6 +48,10 @@ _Avoid_: Produced unit
 A completed unit reported as unusable in `job_completed.metadata.scrap_quantity`.
 _Avoid_: Failed Inspection
 
+**Not Started**:
+An incomplete Job with no start event as of the selected operational timestamp.
+_Avoid_: Active WIP
+
 **Active WIP**:
 A Job that has started and has no completion event as of the selected operational timestamp.
 _Avoid_: All created Jobs, current Jobs
@@ -66,13 +70,9 @@ _Avoid_: Blocked Job
 An evidence-backed current condition that deserves monitoring or intervention.
 _Avoid_: Source event, generic Task, Exception
 
-**Action Required**:
-An Operational Issue that a deterministic triage rule identifies as requiring intervention now.
+**Needs Assignment**:
+An Operational Issue with no Responder assigned to its current episode.
 _Avoid_: Open, In progress
-
-**Priority Worklist**:
-Operational Issues ordered by action requirement, severity, due-time urgency, affected units, and age.
-_Avoid_: Notification feed
 
 **Recommended Action**:
 A concise, condition-specific intervention such as locating a Tool, inspecting a Machine, reviewing failed Inspections, or replanning a late Job.
@@ -83,16 +83,12 @@ An Active WIP Job whose target due time is earlier than the selected operational
 _Avoid_: Predictive risk
 
 **Responder**:
-A prototype team member who can own the response to an Operational Issue. Responders are application seed data, not identities supplied by the Manufacturing Event log.
-_Avoid_: Operator when describing issue ownership
+A person who can be assigned to coordinate the response to an Operational Issue.
+_Avoid_: Operator, Inspector
 
-**Owner**:
-The Responder accountable for the Recommended Action; an Operational Issue without one Needs Owner.
-_Avoid_: Job Operator
-
-**Assignment Record**:
-The application-created fact that assigns one Responder to one specific Operational Issue episode at a recorded time. Reassignment replaces the current Owner without creating response history.
-_Avoid_: Job assignment, acknowledgment, response status
+**Assignment**:
+The recorded association between one Responder and one specific Operational Issue episode.
+_Avoid_: Ownership, Job assignment, acknowledgment, response status
 
 ## Truth
 
@@ -101,7 +97,7 @@ A value present in a supplied Manufacturing Event.
 _Avoid_: Inference
 
 **Derived Signal**:
-A reproducible calculation or classification made from Source Facts, such as Active WIP, Past Due WIP, or Action Required.
+A reproducible calculation or classification made from Source Facts, such as Active WIP, Past Due WIP, or Needs Assignment.
 _Avoid_: Source Fact
 
 **Workflow Fact**:
