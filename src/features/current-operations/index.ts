@@ -2,17 +2,6 @@ export {
   projectCurrentOperations,
   projectJobTimeline,
 } from "./project-current-operations";
-export {
-  assignOperationalIssue,
-  getCurrentOperations,
-  getJobTimeline,
-  listResponders,
-} from "./service";
-export type {
-  AssignOperationalIssueInput,
-  CurrentOperationsQuery,
-  JobTimelineQuery,
-} from "./service";
 export type {
   CurrentOperationsCounts,
   CurrentOperationsSnapshot,
@@ -25,5 +14,4 @@ export type {
   OperationalIssue,
   OperationalIssueCondition,
   ProjectCurrentOperationsInput,
-  Responder,
 } from "./types";

@@ -96,12 +96,6 @@ export type JobTimeline = {
   events: NormalizedManufacturingEvent[];
 };
 
-export type Responder = {
-  id: string;
-  displayName: string;
-  role: string;
-};
-
 export type ProjectCurrentOperationsInput = {
   facility: Facility;
   asOf: string;
