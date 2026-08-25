@@ -213,7 +213,7 @@ describe("ControlTowerScreen", () => {
     ).toBe("true");
 
     expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
-      "Needs assignment1Unassigned issues",
+      "Needs assignment1Unassigned jobs",
       "Active WIP1Jobs",
       "Due next 24h0Jobs",
       "Blocked / Held1Jobs",

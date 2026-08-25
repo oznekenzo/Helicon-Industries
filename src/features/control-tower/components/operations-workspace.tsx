@@ -43,7 +43,7 @@ const viewDefinitions: Array<{
   {
     key: "needs-assignment",
     label: "Needs assignment",
-    sublabel: "Unassigned issues",
+    sublabel: "Unassigned jobs",
   },
   { key: "active-wip", label: "Active WIP", sublabel: "Jobs" },
   { key: "due-next-24h", label: "Due next 24h", sublabel: "Jobs" },
