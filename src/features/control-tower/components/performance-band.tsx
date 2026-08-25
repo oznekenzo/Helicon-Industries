@@ -115,64 +115,83 @@ export function PerformanceBand({
       </div>
       <div className="kpi-grid">
         <article className="kpi-cell">
-          <h3>On-time completion</h3>
-          <div className="kpi-value-row">
-            <strong>{formatPercent(onTime.value)}</strong>
-            <Delta metric={onTime} />
+          <div className="kpi-cell__header">
+            <h3>On-time completion</h3>
+            <div className="kpi-value-row">
+              <strong>{formatPercent(onTime.value)}</strong>
+              <Delta metric={onTime} />
+            </div>
+            <p>
+              {onTime.denominator === undefined
+                ? "Not reported"
+                : `${onTime.numerator ?? 0} of ${onTime.denominator} Jobs`}
+            </p>
           </div>
-          <p>
-            {onTime.denominator === undefined
-              ? "Not reported"
-              : `${onTime.numerator ?? 0} of ${onTime.denominator} Jobs`}
-          </p>
-          <Meter prior={onTime.priorValue} value={onTime.value} />
-          <small>
-            PRIOR{" "}
-            {onTime.priorValue === null
-              ? "—"
-              : formatPercent(onTime.priorValue)}
-          </small>
+
+          <div className="kpi-meter-row">
+            <Meter prior={onTime.priorValue} value={onTime.value} />
+            <small>
+              PRIOR{" "}
+              {onTime.priorValue === null
+                ? "—"
+                : formatPercent(onTime.priorValue)}
+            </small>
+          </div>
         </article>
+
         <article className="kpi-cell">
-          <h3>Good units produced</h3>
-          <div className="kpi-value-row">
-            <strong>
-              {units.value === null ? "—" : formatInteger(units.value)}
-            </strong>
-            <Delta metric={units} />
+          <div className="kpi-cell__header">
+            <h3>Good units produced</h3>
+            <div className="kpi-value-row">
+              <strong>
+                {units.value === null ? "—" : formatInteger(units.value)}
+              </strong>
+              <Delta metric={units} />
+            </div>
+            <p>
+              {selected === "all"
+                ? "All-time total"
+                : `${selected.replace("d", "-day")} total`}
+            </p>
           </div>
-          <p>
-            {selected === "all"
-              ? "All-time total"
-              : `${selected.replace("d", "-day")} total`}
-          </p>
-          <DailyBars values={units.dailyValues} />
-          <small>
-            DAILY · PRIOR{" "}
-            {units.priorValue === null ? "—" : formatInteger(units.priorValue)}
-          </small>
+
+          <div className="kpi-meter-row">
+            <DailyBars values={units.dailyValues} />
+            <small>
+              DAILY · PRIOR{" "}
+              {units.priorValue === null
+                ? "—"
+                : formatInteger(units.priorValue)}
+            </small>
+          </div>
         </article>
+
         <article className="kpi-cell">
-          <h3>Production yield</h3>
-          <div className="kpi-value-row">
-            <strong>{formatPercent(productionYield.value)}</strong>
-            <Delta metric={productionYield} />
+          <div className="kpi-cell__header">
+            <h3>Production yield</h3>
+            <div className="kpi-value-row">
+              <strong>{formatPercent(productionYield.value)}</strong>
+              <Delta metric={productionYield} />
+            </div>
+            <p>
+              {productionYield.scrapUnits === undefined
+                ? "Not reported"
+                : `${formatInteger(productionYield.scrapUnits)} scrap units`}
+            </p>
           </div>
-          <p>
-            {productionYield.scrapUnits === undefined
-              ? "Not reported"
-              : `${formatInteger(productionYield.scrapUnits)} scrap units`}
-          </p>
-          <Meter
-            prior={productionYield.priorValue}
-            value={productionYield.value}
-          />
-          <small>
-            PRIOR{" "}
-            {productionYield.priorValue === null
-              ? "—"
-              : formatPercent(productionYield.priorValue)}
-          </small>
+
+          <div className="kpi-meter-row">
+            <Meter
+              prior={productionYield.priorValue}
+              value={productionYield.value}
+            />
+            <small>
+              PRIOR{" "}
+              {productionYield.priorValue === null
+                ? "—"
+                : formatPercent(productionYield.priorValue)}
+            </small>
+          </div>
         </article>
       </div>
     </section>
