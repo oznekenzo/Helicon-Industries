@@ -270,7 +270,7 @@ describe("projectCurrentOperations", () => {
     expect(snapshot.views.notStarted[0]?.jobId).toBe(jobId);
   });
 
-  it("includes incomplete not-started jobs in due and past-due views", () => {
+  it("keeps not-started jobs out of Past Due WIP", () => {
     const overdue = "job_not_started_overdue";
     const dueSoon = "job_not_started_due_soon";
     const future = "job_not_started_future";
@@ -292,9 +292,7 @@ describe("projectCurrentOperations", () => {
     expect(snapshot.views.dueNext24Hours.map((job) => job.jobId)).toEqual([
       dueSoon,
     ]);
-    expect(snapshot.views.pastDueWip.map((job) => job.jobId)).toEqual([
-      overdue,
-    ]);
+    expect(snapshot.views.pastDueWip).toEqual([]);
     expect(snapshot.currentIssues).toEqual([
       expect.objectContaining({ jobId: overdue, condition: "past_due" }),
     ]);

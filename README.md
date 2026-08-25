@@ -5,11 +5,14 @@ A manufacturing control tower prototype built on a synthetic event log.
 ## Table of contents
 
 - [Project brief](#project-brief)
+- [Access](#access)
 - [Stack](#stack)
+- [Architecture decisions](#architecture-decisions)
 - [Prototype versus production](#prototype-versus-production)
 - [Assumptions](#assumptions)
 - [Changes and additions to the supplied data](#changes-and-additions-to-the-supplied-data)
 - [Development](#development)
+- [Database and ingestion](#database-and-ingestion)
 - [Deployment](#deployment)
 - [Process](#process)
 - [What's next](#whats-next)
@@ -30,6 +33,14 @@ Deliverables:
 Full path is fine: ingest → model → API → UI → deploy.
 ```
 
+## Access
+
+- URL: [https://helicon-industries.vercel.app](https://helicon-industries.vercel.app)
+- Username: `helicon`
+- Password: provided separately with the submission; never committed to the repository
+
+Open the URL and sign in to reach `/dashboard`. Unauthenticated browser requests to protected HTML routes redirect to the sign-in page; unauthenticated API-style requests return `401`.
+
 ## Stack
 
 - Next.js 16, React 19, and TypeScript
@@ -39,7 +50,14 @@ Full path is fine: ingest → model → API → UI → deploy.
 - Radix UI and Tabler Icons
 - Vercel for Preview and Production deployments
 - Vitest, Testing Library, ESLint, jsx-a11y, and Prettier
-- Server-side Basic Auth with an HTTP-only session cookie
+- Server-side HTTP Basic Auth credentials with an HTTP-only session cookie for browser sign-in
+
+## Architecture decisions
+
+- Preserve every raw line, then store a validated canonical event set for queries and auditability.
+- Reconstruct Jobs, operational views, issues, and KPIs in TypeScript at an explicit `asOf` timestamp.
+- Keep database access server-side: pooled Supabase connections at runtime and a direct connection for migrations.
+- Keep Responder assignments separate from immutable manufacturing Source Facts.
 
 ## Prototype versus production
 
@@ -84,9 +102,24 @@ pnpm dev
 
 Run all checks with `pnpm check`.
 
+## Database and ingestion
+
+```bash
+# Inspect the source without writing
+pnpm events:inspect /path/to/manufacturing_events.jsonl
+
+# Apply committed migrations, then ingest
+pnpm db:migrate
+pnpm events:persist /path/to/manufacturing_events.jsonl
+
+# After a structural schema change
+pnpm db:generate
+pnpm db:migrate
+```
+
 ## Deployment
 
-The Vercel project requires pooled `DATABASE_URL`, `BASIC_AUTH_USERNAME`, and `BASIC_AUTH_PASSWORD`. `DIRECT_DATABASE_URL` is only for local migrations.
+The Vercel project requires pooled `DATABASE_URL`, `BASIC_AUTH_USERNAME`, and `BASIC_AUTH_PASSWORD` in Preview and Production. `DIRECT_DATABASE_URL` is only for local migrations and is not deployed.
 
 ## Process
 

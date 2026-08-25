@@ -213,13 +213,17 @@ The calculation uses canonical completion events in the measurement period. On-t
 
 All current conditions are evaluated at an explicit as-of timestamp.
 
+### Not Started
+
+An incomplete Job with no `job_started` event at the as-of timestamp.
+
 ### Active WIP
 
 A Job with a `job_started` event and no accepted `job_completed` event at the as-of timestamp.
 
 ### Due within 24 hours
 
-An Active WIP Job whose `target_due_at` is after the as-of timestamp and no more than 24 hours later.
+An incomplete Job whose `target_due_at` is after the as-of timestamp and no more than 24 hours later.
 
 ### Blocked or held
 
@@ -229,18 +233,18 @@ An incomplete Job whose latest accepted relevant state event is `job_blocked` or
 
 An Active WIP Job whose `target_due_at` is earlier than the as-of timestamp. This is a deterministic lateness condition, not predictive risk scoring.
 
-### Needs Owner
+### Needs Assignment
 
-An Action Required Operational Issue whose current issue episode has no Assignment Record.
+An Operational Issue whose current episode has no Assignment.
 
-### Action Required
+### Current Operational Issues
 
-An Operational Issue classified by a deterministic triage rule as requiring intervention now. The initial rules include:
+The deterministic triage rules create one current Operational Issue for:
 
 - a currently blocked or held Job
-- an Active WIP Job already past `target_due_at`
+- an incomplete Job already past `target_due_at`
 
-When conditions overlap, a current blocked or held condition takes precedence over Past Due WIP so the Priority Worklist contains one Operational Issue per Job. Quality, cycle-time, Tool, Material, Machine, and sensor patterns require separately defined thresholds before they can be classified as Action Required.
+When conditions overlap, a current blocked or held condition takes precedence over the past-due condition so there is one Operational Issue per Job. Past Due WIP itself remains limited to Jobs that have started. Quality, cycle-time, Tool, Material, Machine, and sensor patterns require separately defined thresholds before becoming Operational Issues.
 
 ## Operational issue
 
@@ -257,7 +261,7 @@ type OperationalIssue = {
   dueAt: string;
 };
 
-type AssignmentRecord = {
+type Assignment = {
   issueKey: string;
   jobId: string;
   responderId: string;
@@ -265,7 +269,7 @@ type AssignmentRecord = {
 };
 ```
 
-Every Operational Issue references Source Fact evidence. Condition, severity, Recommended Action, Action Required, and Past Due WIP are Derived Signals. An Assignment Record contains only explicit application-created Workflow Facts. There is no generic `open` or `in_progress` status, acknowledgment, latest response, or response history.
+Every Operational Issue references Source Fact evidence. Condition, severity, Recommended Action, Needs Assignment, and Past Due WIP are Derived Signals. An Assignment contains only explicit application-created Workflow Facts. There is no generic `open` or `in_progress` status, acknowledgment, latest response, or response history.
 
 Issue keys identify a specific condition episode:
 
@@ -275,9 +279,9 @@ Issue keys identify a specific condition episode:
 
 Assignments do not silently transfer when a new condition episode begins. Resolved assignments remain stored but do not appear in current operating views.
 
-Severity is deterministic. Blocked or held Jobs map source priority `high` to Critical, `normal` to High, and `low` to Medium. Past Due WIP maps source priority `high` to High, `normal` to Medium, and `low` to Low.
+Severity is deterministic. Blocked or held Jobs map source priority `high` to Critical, `normal` to High, and `low` to Medium. Past-due issues map source priority `high` to High, `normal` to Medium, and `low` to Low.
 
-The Priority Worklist ranks by severity, remaining units, due time, condition age, and Job ID. Remaining units are `max(target_quantity - sum(cycle_completed.quantity), 0)` at the selected timestamp.
+The Needs Assignment worklist ranks by severity, remaining units, due time, condition age, and Job ID. Remaining units are `max(target_quantity - sum(cycle_completed.quantity), 0)` at the selected timestamp.
 
 ## Data-quality observations
 
