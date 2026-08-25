@@ -1184,6 +1184,13 @@ input:focus-visible,
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.kpi-meter-row,
+.kpi-cell__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .kpi-cell {
   display: flex;
   min-width: 0;
@@ -1268,6 +1275,7 @@ input:focus-visible,
   gap: 2px;
   height: 9px;
   margin-top: 10px;
+  width: 100%;
 }
 
 .meter span {
@@ -1289,6 +1297,7 @@ input:focus-visible,
   height: 34px;
   align-items: flex-end;
   gap: 3px;
+  width: 100%;
   margin-top: 8px;
 }
 
