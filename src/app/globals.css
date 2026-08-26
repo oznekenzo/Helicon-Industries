@@ -1439,7 +1439,7 @@ input:focus-visible,
 .operations-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: auto;
+  table-layout: fixed;
 }
 
 .operations-table thead {
@@ -1464,13 +1464,14 @@ input:focus-visible,
 }
 
 .operations-table td {
-  height: 40px;
+  height: 48px;
   max-width: 260px;
   padding: 0 12px 0 0;
   overflow: hidden;
   border-bottom: 1px solid #1f1f1d;
   font-size: 12px;
   text-overflow: ellipsis;
+  vertical-align: middle;
   white-space: nowrap;
 }
 
@@ -1508,9 +1509,37 @@ input:focus-visible,
   max-width: 220px;
 }
 
-.condition-cell {
+.operations-cell-value {
   display: inline-flex;
   max-width: 100%;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.15;
+}
+
+.operations-cell-detail {
+  overflow: hidden;
+  color: var(--secondary);
+  font-size: 10px;
+  text-overflow: ellipsis;
+}
+
+.operations-condition {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.operations-condition > .severity {
+  flex: none;
+}
+
+.condition-cell {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1;
   align-items: center;
   gap: 6px;
   overflow: hidden;
@@ -1529,15 +1558,6 @@ input:focus-visible,
 }
 .is-critical {
   color: var(--critical);
-}
-
-.operations-table:has(th:nth-child(7):last-child) th:nth-child(1),
-.operations-table:has(th:nth-child(7):last-child) td:nth-child(1) {
-  width: 96px;
-}
-.operations-table:has(th:nth-child(7):last-child) th:nth-child(2),
-.operations-table:has(th:nth-child(7):last-child) td:nth-child(2) {
-  width: 96px;
 }
 
 .job-drawer {

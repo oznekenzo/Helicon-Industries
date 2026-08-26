@@ -85,13 +85,12 @@ export type ControlTowerIssue = {
   affectedUnits: number;
   recommendedAction: string;
   assignee?: Assignee;
-  jobPriority: Priority;
 };
 
 export type OperationsCounts = Record<OperationsViewKey, number>;
 
 export type OperationsViews = {
-  "needs-assignment": ControlTowerIssue[];
+  "needs-assignment": ControlTowerJob[];
   "not-started": ControlTowerJob[];
   "active-wip": ControlTowerJob[];
   "due-next-24h": ControlTowerJob[];

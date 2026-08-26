@@ -144,7 +144,6 @@ The Vercel project requires pooled `DATABASE_URL`, `BASIC_AUTH_USERNAME`, and `B
 
 - kpi against target - compare top level factory stats against declared company wide north star performance targets
 - tool insights analytics - create insights of low performing tools creating higher than normal scrap parts
-- column cleanup - column ordering is a bit unorganized / inconsistent between current operations focused state
 - motion pass - a little goes a long way
 - accessibility pass
 - strict design system

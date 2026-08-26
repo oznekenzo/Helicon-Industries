@@ -11,27 +11,20 @@ import {
 } from "@tabler/icons-react";
 
 import {
-  AssignmentMenu,
   EmptyState,
-  PriorityBadge,
   SegmentedControl,
-  SeverityIndicator,
   priorityOptions,
 } from "@/components/ui/control-tower-primitives";
-import {
-  formatAge,
-  formatInteger,
-  formatShortTimestamp,
-  humanize,
-} from "@/features/control-tower/format";
+import { formatShortTimestamp } from "@/features/control-tower/format";
 import type {
   ControlTowerIssue,
-  ControlTowerJob,
   ControlTowerPageData,
   OperationsViewKey,
   PriorityFilter,
 } from "@/features/control-tower/types";
 import { classNames } from "@/lib/class-names";
+
+import { OperationsTable } from "./operations-table";
 
 const viewDefinitions: Array<{
   key: OperationsViewKey;
@@ -94,411 +87,6 @@ const viewDetails: Record<
   },
 };
 
-function Condition({ job, asOf }: { job: ControlTowerJob; asOf: string }) {
-  const overdueNotStarted =
-    job.condition === "not-started" &&
-    Date.parse(job.targetDueAt) < Date.parse(asOf);
-  const warning = job.condition === "blocked" || job.condition === "held";
-  const critical = job.condition === "past-due" || overdueNotStarted;
-  const IconComponent = warning
-    ? IconAlertTriangleFilled
-    : critical
-      ? IconClockExclamation
-      : job.condition === "not-started"
-        ? IconClock
-        : IconPlayerPlay;
-  return (
-    <span className="condition-cell">
-      <IconComponent
-        aria-hidden="true"
-        className={critical ? "is-critical" : warning ? "is-warning" : ""}
-        size={warning ? 10 : 13}
-        stroke={warning ? 0 : 1.7}
-      />
-      <span>{overdueNotStarted ? "Past due" : humanize(job.condition)}</span>
-      {overdueNotStarted ? (
-        <span className="condition-cell__reason">· Not started</span>
-      ) : null}
-      {job.conditionReason ? (
-        <span className="condition-cell__reason">
-          · {humanize(job.conditionReason)}
-        </span>
-      ) : null}
-    </span>
-  );
-}
-
-function JobRow({
-  children,
-  jobId,
-  selected,
-  onOpen,
-}: {
-  children: React.ReactNode;
-  jobId: string;
-  selected: boolean;
-  onOpen: (jobId: string) => void;
-}) {
-  return (
-    <tr
-      aria-selected={selected}
-      onClick={() => onOpen(jobId)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onOpen(jobId);
-        }
-      }}
-      tabIndex={0}
-    >
-      {children}
-    </tr>
-  );
-}
-
-function TableShell({
-  label,
-  columns,
-  children,
-}: {
-  label: string;
-  columns: string[];
-  children: React.ReactNode;
-}) {
-  return (
-    <table className="operations-table">
-      <caption className="sr-only">{label}</caption>
-      <thead>
-        <tr>
-          {columns.map((column) => (
-            <th key={column} scope="col">
-              {column}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>{children}</tbody>
-    </table>
-  );
-}
-
-function NeedsAssignmentTable({
-  issues,
-  jobs,
-  data,
-  selectedJobId,
-  assigningIssueKey,
-  onOpenJob,
-  onAssign,
-}: {
-  issues: ControlTowerIssue[];
-  jobs: ControlTowerJob[];
-  data: ControlTowerPageData;
-  selectedJobId: string | null;
-  assigningIssueKey: string | null;
-  onOpenJob: (jobId: string) => void;
-  onAssign: (issue: ControlTowerIssue, responderId: string) => void;
-}) {
-  const jobById = new Map(jobs.map((job) => [job.jobId, job]));
-  return (
-    <TableShell
-      columns={[
-        "Severity",
-        "Job priority",
-        "Job",
-        "Condition",
-        "Operational impact",
-        "Recommended action",
-        "Assignment",
-      ]}
-      label="Needs assignment"
-    >
-      {issues.map((issue) => {
-        const job = jobById.get(issue.jobId);
-        return (
-          <JobRow
-            jobId={issue.jobId}
-            key={issue.issueKey}
-            onOpen={onOpenJob}
-            selected={selectedJobId === issue.jobId}
-          >
-            <td>
-              <SeverityIndicator severity={issue.severity} />
-            </td>
-            <td>
-              <PriorityBadge priority={issue.jobPriority} />
-            </td>
-            <td className="mono-cell">{issue.jobId}</td>
-            <td>
-              {job ? (
-                <Condition asOf={data.asOf} job={job} />
-              ) : (
-                <span>{humanize(issue.condition)}</span>
-              )}
-            </td>
-            <td className="muted-cell">
-              {formatInteger(issue.affectedUnits)} units at risk
-            </td>
-            <td className="truncate-cell" title={issue.recommendedAction}>
-              {issue.recommendedAction}
-            </td>
-            <td>
-              <AssignmentMenu
-                disabled={assigningIssueKey === issue.issueKey}
-                onAssign={(responderId) => onAssign(issue, responderId)}
-                responders={data.responders}
-              />
-            </td>
-          </JobRow>
-        );
-      })}
-    </TableShell>
-  );
-}
-
-function JobTable({
-  view,
-  jobs,
-  data,
-  selectedJobId,
-  assigningIssueKey,
-  onOpenJob,
-  onAssign,
-}: {
-  view: Exclude<OperationsViewKey, "needs-assignment">;
-  jobs: ControlTowerJob[];
-  data: ControlTowerPageData;
-  selectedJobId: string | null;
-  assigningIssueKey: string | null;
-  onOpenJob: (jobId: string) => void;
-  onAssign: (issue: ControlTowerIssue, responderId: string) => void;
-}) {
-  if (view === "not-started") {
-    return (
-      <TableShell
-        columns={[
-          "Job priority",
-          "Job",
-          "Customer",
-          "Part · Material",
-          "Target",
-          "Tool",
-          "Target due",
-        ]}
-        label="Not started jobs"
-      >
-        {jobs.map((job) => (
-          <JobRow
-            jobId={job.jobId}
-            key={job.jobId}
-            onOpen={onOpenJob}
-            selected={selectedJobId === job.jobId}
-          >
-            <td>
-              <PriorityBadge priority={job.priority} />
-            </td>
-            <td className="mono-cell">{job.jobId}</td>
-            <td className="mono-cell muted-cell">{job.customerId}</td>
-            <td className="mono-cell muted-cell">
-              {job.partId} · {job.material}
-            </td>
-            <td>{formatInteger(job.targetQuantity)} units</td>
-            <td className="mono-cell muted-cell">
-              {job.toolId ?? "Not reported"}
-            </td>
-            <td
-              className={
-                Date.parse(job.targetDueAt) < Date.parse(data.asOf)
-                  ? "critical-cell"
-                  : ""
-              }
-            >
-              {formatShortTimestamp(job.targetDueAt)}
-            </td>
-          </JobRow>
-        ))}
-      </TableShell>
-    );
-  }
-
-  if (view === "blocked-held") {
-    return (
-      <TableShell
-        columns={[
-          "Job priority",
-          "Job",
-          "Condition",
-          "Condition age",
-          "Target due",
-          "Remaining / Target",
-          "Asset",
-          "Assignment",
-        ]}
-        label="Blocked or held jobs"
-      >
-        {jobs.map((job) => (
-          <JobRow
-            jobId={job.jobId}
-            key={job.jobId}
-            onOpen={onOpenJob}
-            selected={selectedJobId === job.jobId}
-          >
-            <td>
-              <PriorityBadge priority={job.priority} />
-            </td>
-            <td className="mono-cell">{job.jobId}</td>
-            <td>
-              <Condition asOf={data.asOf} job={job} />
-            </td>
-            <td>{formatAge(job.conditionSince, data.asOf)}</td>
-            <td className="critical-cell">
-              {formatShortTimestamp(job.targetDueAt)}
-            </td>
-            <td>
-              {formatInteger(job.remainingQuantity)} /{" "}
-              {formatInteger(job.targetQuantity)}
-            </td>
-            <td className="mono-cell muted-cell">
-              {job.machineId ?? job.toolId ?? "Not reported"}
-            </td>
-            <td>
-              {job.currentIssue ? (
-                <AssignmentMenu
-                  assigneeName={job.currentIssue.assignee?.displayName}
-                  disabled={assigningIssueKey === job.currentIssue.issueKey}
-                  onAssign={(responderId) =>
-                    onAssign(job.currentIssue!, responderId)
-                  }
-                  responders={data.responders}
-                />
-              ) : (
-                <span className="muted-cell">—</span>
-              )}
-            </td>
-          </JobRow>
-        ))}
-      </TableShell>
-    );
-  }
-
-  if (view === "past-due-wip") {
-    return (
-      <TableShell
-        columns={[
-          "Job priority",
-          "Job",
-          "Condition",
-          "Overdue by",
-          "Remaining / Target",
-          "Customer",
-          "Assignment",
-        ]}
-        label="Past due work in progress"
-      >
-        {jobs.map((job) => (
-          <JobRow
-            jobId={job.jobId}
-            key={job.jobId}
-            onOpen={onOpenJob}
-            selected={selectedJobId === job.jobId}
-          >
-            <td>
-              <PriorityBadge priority={job.priority} />
-            </td>
-            <td className="mono-cell">{job.jobId}</td>
-            <td>
-              <Condition asOf={data.asOf} job={job} />
-            </td>
-            <td className="critical-cell">
-              {formatAge(job.targetDueAt, data.asOf)}
-            </td>
-            <td>
-              {formatInteger(job.remainingQuantity)} /{" "}
-              {formatInteger(job.targetQuantity)}
-            </td>
-            <td className="mono-cell muted-cell">{job.customerId}</td>
-            <td>
-              {job.currentIssue ? (
-                <AssignmentMenu
-                  assigneeName={job.currentIssue.assignee?.displayName}
-                  disabled={assigningIssueKey === job.currentIssue.issueKey}
-                  onAssign={(responderId) =>
-                    onAssign(job.currentIssue!, responderId)
-                  }
-                  responders={data.responders}
-                />
-              ) : (
-                <span className="muted-cell">—</span>
-              )}
-            </td>
-          </JobRow>
-        ))}
-      </TableShell>
-    );
-  }
-
-  return (
-    <TableShell
-      columns={[
-        "Job priority",
-        "Job",
-        "Condition",
-        "Customer",
-        "Part · Material",
-        "Asset",
-        "Produced / Target",
-        "Target due",
-        "Operator",
-      ]}
-      label={
-        view === "active-wip"
-          ? "Active work in progress"
-          : "Jobs due next 24 hours"
-      }
-    >
-      {jobs.map((job) => (
-        <JobRow
-          jobId={job.jobId}
-          key={job.jobId}
-          onOpen={onOpenJob}
-          selected={selectedJobId === job.jobId}
-        >
-          <td>
-            <PriorityBadge priority={job.priority} />
-          </td>
-          <td className="mono-cell">{job.jobId}</td>
-          <td>
-            <Condition asOf={data.asOf} job={job} />
-          </td>
-          <td className="mono-cell muted-cell">{job.customerId}</td>
-          <td className="mono-cell muted-cell">
-            {job.partId} · {job.material}
-          </td>
-          <td className="mono-cell muted-cell">
-            {job.machineId ?? job.toolId ?? "Not reported"}
-          </td>
-          <td>
-            {formatInteger(job.producedQuantity)} /{" "}
-            {formatInteger(job.targetQuantity)}
-          </td>
-          <td
-            className={
-              Date.parse(job.targetDueAt) < Date.parse(data.asOf)
-                ? "critical-cell"
-                : ""
-            }
-          >
-            {formatShortTimestamp(job.targetDueAt)}
-          </td>
-          <td className="mono-cell muted-cell">
-            {job.operatorId ?? "Not reported"}
-          </td>
-        </JobRow>
-      ))}
-    </TableShell>
-  );
-}
-
 function emptyCopy(view: OperationsViewKey) {
   const values: Record<
     OperationsViewKey,
@@ -560,23 +148,16 @@ export function OperationsWorkspace({
   onOpenJob: (jobId: string) => void;
   onAssign: (issue: ControlTowerIssue, responderId: string) => void;
 }) {
-  const allJobs = [...data.views["not-started"], ...data.views["active-wip"]];
-  const issues = data.views["needs-assignment"].filter(
-    (issue) => priority === "all" || issue.jobPriority === priority,
+  const jobs = data.views[view].filter(
+    (job) => priority === "all" || job.priority === priority,
   );
-  const jobs =
-    view === "needs-assignment"
-      ? []
-      : data.views[view].filter(
-          (job) => priority === "all" || job.priority === priority,
-        );
-  const count = view === "needs-assignment" ? issues.length : jobs.length;
+  const count = jobs.length;
   const empty = emptyCopy(view);
 
   return (
     <section
-      className="operations-section"
       aria-labelledby="operations-heading"
+      className="operations-section"
     >
       <div className="section-heading-row">
         <h2 id="operations-heading">Current operations</h2>
@@ -639,23 +220,14 @@ export function OperationsWorkspace({
               icon={empty.icon}
               title={empty.title}
             />
-          ) : view === "needs-assignment" ? (
-            <NeedsAssignmentTable
-              assigningIssueKey={assigningIssueKey}
-              data={data}
-              issues={issues}
-              jobs={allJobs}
-              onAssign={onAssign}
-              onOpenJob={onOpenJob}
-              selectedJobId={selectedJobId}
-            />
           ) : (
-            <JobTable
+            <OperationsTable
+              asOf={data.asOf}
               assigningIssueKey={assigningIssueKey}
-              data={data}
               jobs={jobs}
               onAssign={onAssign}
               onOpenJob={onOpenJob}
+              responders={data.responders}
               selectedJobId={selectedJobId}
               view={view}
             />
