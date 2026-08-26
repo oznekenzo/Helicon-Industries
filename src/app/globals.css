@@ -191,7 +191,7 @@ input:focus-visible,
   gap: 36px;
 }
 
-.auth-context__facts>div {
+.auth-context__facts > div {
   display: flex;
   flex-direction: column;
 }
@@ -259,11 +259,11 @@ input:focus-visible,
   margin-top: 1px;
 }
 
-.auth-field+.auth-field {
+.auth-field + .auth-field {
   margin-top: 16px;
 }
 
-.auth-field>span,
+.auth-field > span,
 .auth-field__label-row {
   display: flex;
   align-items: baseline;
@@ -796,8 +796,8 @@ input:focus-visible,
   outline: 0;
 }
 
-.assignment-menu>[role="group"]>[role="presentation"],
-.assignment-menu>[role="presentation"] {
+.assignment-menu > [role="group"] > [role="presentation"],
+.assignment-menu > [role="presentation"] {
   padding: 7px 9px 6px;
   color: var(--muted);
   font-family: var(--font-mono), monospace;
@@ -888,7 +888,6 @@ input:focus-visible,
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .drawer-overlay,
   .drawer-content {
     animation: none;
@@ -929,7 +928,7 @@ input:focus-visible,
   color: var(--ink);
 }
 
-.brand-lockup>span:last-child {
+.brand-lockup > span:last-child {
   display: flex;
   flex-direction: column;
   line-height: 1.05;
@@ -1077,7 +1076,7 @@ input:focus-visible,
   color: var(--muted);
 }
 
-.page-header .data-status+[data-radix-popper-content-wrapper] {
+.page-header .data-status + [data-radix-popper-content-wrapper] {
   z-index: 80;
 }
 
@@ -1171,7 +1170,7 @@ input:focus-visible,
   text-transform: uppercase;
 }
 
-.section-heading-row>span {
+.section-heading-row > span {
   color: var(--muted);
   font-family: var(--font-mono), monospace;
   font-size: 10px;
@@ -1304,11 +1303,13 @@ input:focus-visible,
 .daily-bars span {
   min-width: 3px;
   flex: 1;
-  background: repeating-linear-gradient(to top,
-      currentColor 0,
-      currentColor 3px,
-      transparent 3px,
-      transparent 5px);
+  background: repeating-linear-gradient(
+    to top,
+    currentColor 0,
+    currentColor 3px,
+    transparent 3px,
+    transparent 5px
+  );
   color: var(--accent);
 }
 
@@ -1422,7 +1423,7 @@ input:focus-visible,
   line-height: 1.12;
 }
 
-.operations-tab>span:last-child {
+.operations-tab > span:last-child {
   max-width: 100%;
   overflow: hidden;
   color: var(--muted);
@@ -1456,7 +1457,7 @@ input:focus-visible,
   text-transform: uppercase;
 }
 
-.operations-canvas__header>span {
+.operations-canvas__header > span {
   color: var(--muted);
   font-family: var(--font-mono), monospace;
   font-size: 9.5px;
@@ -1481,7 +1482,7 @@ input:focus-visible,
 .operations-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: auto;
+  table-layout: fixed;
 }
 
 .operations-table thead {
@@ -1506,13 +1507,14 @@ input:focus-visible,
 }
 
 .operations-table td {
-  height: 40px;
+  height: 48px;
   max-width: 260px;
   padding: 0 12px 0 0;
   overflow: hidden;
   border-bottom: 1px solid #1f1f1d;
   font-size: 12px;
   text-overflow: ellipsis;
+  vertical-align: middle;
   white-space: nowrap;
 }
 
@@ -1555,15 +1557,43 @@ input:focus-visible,
   max-width: 220px;
 }
 
-.condition-cell {
+.operations-cell-value {
   display: inline-flex;
   max-width: 100%;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.15;
+}
+
+.operations-cell-detail {
+  overflow: hidden;
+  color: var(--secondary);
+  font-size: 10px;
+  text-overflow: ellipsis;
+}
+
+.operations-condition {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.operations-condition > .severity {
+  flex: none;
+}
+
+.condition-cell {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1;
   align-items: center;
   gap: 6px;
   overflow: hidden;
 }
 
-.condition-cell>span {
+.condition-cell > span {
   white-space: nowrap;
 }
 
@@ -1579,16 +1609,6 @@ input:focus-visible,
 
 .is-critical {
   color: var(--critical);
-}
-
-.operations-table:has(th:nth-child(7):last-child) th:nth-child(1),
-.operations-table:has(th:nth-child(7):last-child) td:nth-child(1) {
-  width: 96px;
-}
-
-.operations-table:has(th:nth-child(7):last-child) th:nth-child(2),
-.operations-table:has(th:nth-child(7):last-child) td:nth-child(2) {
-  width: 96px;
 }
 
 .job-drawer {
@@ -1644,7 +1664,7 @@ input:focus-visible,
   background: var(--panel);
 }
 
-.issue-card>strong {
+.issue-card > strong {
   font-size: 12.5px;
   font-weight: 500;
 }
@@ -1668,7 +1688,7 @@ input:focus-visible,
   margin: 0;
 }
 
-.drawer-key-values>div {
+.drawer-key-values > div {
   display: grid;
   grid-template-columns: 116px minmax(0, 1fr);
   gap: 8px;

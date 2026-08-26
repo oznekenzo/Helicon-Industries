@@ -55,7 +55,6 @@ const issue = {
   detectedAt: job.conditionSince,
   affectedUnits: 80,
   recommendedAction: "Locate and stage tool_01",
-  jobPriority: "high" as const,
 };
 
 const pageData: ControlTowerPageData = {
@@ -149,7 +148,7 @@ const pageData: ControlTowerPageData = {
     "past-due-wip": 1,
   },
   views: {
-    "needs-assignment": [issue],
+    "needs-assignment": [{ ...job, currentIssue: issue }],
     "not-started": [],
     "active-wip": [{ ...job, currentIssue: issue }],
     "due-next-24h": [],
@@ -294,6 +293,9 @@ describe("ControlTowerScreen", () => {
       jobId: issue.jobId,
       responderId: "tech_01",
     });
+
+    await user.click(screen.getByRole("tab", { name: /Blocked \/ Held/ }));
+    expect(screen.getByRole("button", { name: /Maya Chen/ })).toBeTruthy();
   });
 
   it("announces assignment failures without removing the issue", async () => {

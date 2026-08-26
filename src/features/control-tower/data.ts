@@ -41,7 +41,6 @@ import type {
   JobDetail,
   PerformanceWindow,
   Responder,
-  Severity,
   TimelineEvent,
 } from "./types";
 
@@ -97,29 +96,12 @@ function mapIssue(issue: OperationalIssue): ControlTowerIssue {
     affectedUnits: issue.affectedUnits,
     recommendedAction: issue.recommendedAction,
     ...(issue.assignee && { assignee: issue.assignee }),
-    jobPriority: issue.job.priority,
   };
 }
 
 function comparePriority(left: Priority, right: Priority) {
   const rank: Record<Priority, number> = { high: 0, normal: 1, low: 2 };
   return rank[left] - rank[right];
-}
-
-function compareIssues(left: ControlTowerIssue, right: ControlTowerIssue) {
-  const severityRank: Record<Severity, number> = {
-    critical: 0,
-    high: 1,
-    medium: 2,
-    low: 3,
-  };
-  return (
-    severityRank[left.severity] - severityRank[right.severity] ||
-    comparePriority(left.jobPriority, right.jobPriority) ||
-    right.affectedUnits - left.affectedUnits ||
-    Date.parse(left.detectedAt) - Date.parse(right.detectedAt) ||
-    left.jobId.localeCompare(right.jobId)
-  );
 }
 
 function mapPerformanceWindow(
@@ -264,7 +246,6 @@ export async function getControlTowerPageData(
     assignments,
   });
   const issues = operations.currentIssues.map(mapIssue);
-  issues.sort(compareIssues);
   const issueByJob = new Map(issues.map((issue) => [issue.jobId, issue]));
   const mapJobs = (source: JobSnapshot[]) =>
     source.map((snapshot) => {
@@ -296,7 +277,9 @@ export async function getControlTowerPageData(
       comparePriority(left.priority, right.priority) ||
       Date.parse(left.targetDueAt) - Date.parse(right.targetDueAt),
   );
-  const needsAssignment = issues.filter((issue) => !issue.assignee);
+  const needsAssignment = mapJobs(
+    operations.views.needsAssignment.map((issue) => issue.job),
+  );
 
   return {
     facility,

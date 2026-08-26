@@ -64,7 +64,7 @@ function applyAssignment(
     views: {
       ...data.views,
       "needs-assignment": data.views["needs-assignment"].filter(
-        (issue) => issue.issueKey !== issueKey,
+        (job) => job.currentIssue?.issueKey !== issueKey,
       ),
       "not-started": data.views["not-started"].map(updateJob),
       "active-wip": data.views["active-wip"].map(updateJob),
