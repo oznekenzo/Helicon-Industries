@@ -478,6 +478,7 @@ input:focus-visible,
 .icon-button:hover {
   background: var(--hover);
 }
+
 .icon-button:disabled {
   color: var(--disabled);
   cursor: not-allowed;
@@ -529,6 +530,7 @@ input:focus-visible,
   background: var(--selected);
   color: var(--ink);
 }
+
 .segmented-control__button:hover:not([aria-pressed="true"]) {
   color: var(--secondary);
 }
@@ -544,12 +546,15 @@ input:focus-visible,
 .severity--critical {
   color: var(--critical);
 }
+
 .severity--high {
   color: var(--warning);
 }
+
 .severity--medium {
   color: var(--info);
 }
+
 .severity--low {
   color: var(--muted);
 }
@@ -579,6 +584,7 @@ input:focus-visible,
   background: rgb(224 122 107 / 11%);
   color: var(--critical);
 }
+
 .priority-badge--low {
   color: var(--muted);
 }
@@ -595,11 +601,13 @@ input:focus-visible,
   background: rgb(125 189 138 / 12%);
   color: var(--healthy);
 }
+
 .status-badge--warning {
   border-color: rgb(217 174 98 / 36%);
   background: rgb(217 174 98 / 12%);
   color: var(--warning);
 }
+
 .status-badge--critical {
   border-color: rgb(224 122 107 / 36%);
   background: rgb(224 122 107 / 12%);
@@ -648,15 +656,18 @@ input:focus-visible,
 .popover-arrow {
   fill: var(--border-strong);
 }
+
 .data-status {
   width: 320px;
   padding: 14px 16px;
 }
+
 .data-status h2 {
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 600;
 }
+
 .data-status p {
   margin: 7px 0 0;
   color: var(--secondary);
@@ -676,10 +687,12 @@ input:focus-visible,
   padding: 8px;
   background: var(--panel);
 }
+
 .data-status__counts dt {
   color: var(--muted);
   font-size: 10px;
 }
+
 .data-status__counts dd {
   margin: 4px 0 0;
   font-family: var(--font-mono), monospace;
@@ -703,6 +716,7 @@ input:focus-visible,
 .facility-trigger:hover {
   background: var(--hover);
 }
+
 .facility-menu {
   width: 210px;
   padding: 4px;
@@ -721,6 +735,7 @@ input:focus-visible,
 .facility-menu__row.is-selected {
   background: var(--selected);
 }
+
 .facility-menu__row.is-disabled {
   color: var(--disabled);
 }
@@ -758,6 +773,7 @@ input:focus-visible,
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .assignment-trigger.is-assigned {
   border-style: solid;
   border-color: var(--border);
@@ -765,14 +781,17 @@ input:focus-visible,
   color: var(--ink);
   font-weight: 400;
 }
+
 .assignment-trigger:disabled {
   opacity: 0.55;
   cursor: wait;
 }
+
 .assignment-menu {
   width: 226px;
   padding: 5px;
 }
+
 .assignment-menu [role="menuitem"] {
   outline: 0;
 }
@@ -799,21 +818,25 @@ input:focus-visible,
 .assignment-menu__item[data-highlighted] {
   background: var(--selected);
 }
+
 .assignment-menu__item span {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 2px;
 }
+
 .assignment-menu__item strong {
   font-size: 12px;
   font-weight: 500;
 }
+
 .assignment-menu__item small,
 .assignment-menu__empty {
   color: var(--muted);
   font-size: 11px;
 }
+
 .assignment-menu__empty {
   padding: 8px 9px;
 }
@@ -843,6 +866,7 @@ input:focus-visible,
 .drawer-content:focus {
   outline: none;
 }
+
 .drawer-close {
   position: absolute;
   z-index: 2;
@@ -855,6 +879,7 @@ input:focus-visible,
     opacity: 0;
   }
 }
+
 @keyframes drawer-in {
   from {
     transform: translateX(18px);
@@ -1158,12 +1183,20 @@ input:focus-visible,
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.kpi-meter-row,
+.kpi-cell__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .kpi-cell {
   display: flex;
   min-width: 0;
   flex-direction: column;
   padding: 14px 20px 12px;
   border-right: 1px solid var(--border-subtle);
+  justify-content: space-between;
 }
 
 .kpi-cell:last-child {
@@ -1206,9 +1239,11 @@ input:focus-visible,
 .kpi-delta.is-positive {
   color: var(--healthy);
 }
+
 .kpi-delta.is-negative {
   color: var(--critical);
 }
+
 .kpi-delta.is-flat {
   color: var(--secondary);
 }
@@ -1239,6 +1274,7 @@ input:focus-visible,
   gap: 2px;
   height: 9px;
   margin-top: 10px;
+  width: 100%;
 }
 
 .meter span {
@@ -1250,6 +1286,7 @@ input:focus-visible,
 .meter span.is-filled {
   background: var(--accent);
 }
+
 .meter span.is-prior {
   background: var(--border-strong);
 }
@@ -1259,6 +1296,7 @@ input:focus-visible,
   height: 34px;
   align-items: flex-end;
   gap: 3px;
+  width: 100%;
   margin-top: 8px;
 }
 
@@ -1283,9 +1321,11 @@ input:focus-visible,
   .page-header {
     padding-inline: 16px;
   }
+
   .global-search {
     width: 190px;
   }
+
   .kpi-cell {
     padding-inline: 16px;
   }
@@ -1326,9 +1366,11 @@ input:focus-visible,
 .operations-tab:last-child {
   border-right: 0;
 }
+
 .operations-tab:hover {
   background: #1a1a18;
 }
+
 .operations-tab[aria-selected="true"] {
   background: var(--panel);
 }
@@ -1425,6 +1467,7 @@ input:focus-visible,
 .operations-canvas__spacer {
   flex: 1;
 }
+
 .operations-canvas__header .priority-label {
   font-size: 10px;
 }
@@ -1483,9 +1526,11 @@ input:focus-visible,
 .operations-table tbody tr:hover {
   background: var(--panel);
 }
+
 .operations-table tbody tr[aria-selected="true"] {
   background: var(--elevated);
 }
+
 .operations-table tbody tr:focus-visible {
   outline-offset: -2px;
 }
@@ -1498,13 +1543,16 @@ input:focus-visible,
 .mono-cell {
   font-family: var(--font-mono), monospace;
 }
+
 .muted-cell {
   color: var(--secondary);
 }
+
 .critical-cell {
   color: var(--critical);
   font-variant-numeric: tabular-nums;
 }
+
 .truncate-cell {
   max-width: 220px;
 }
@@ -1548,14 +1596,17 @@ input:focus-visible,
 .condition-cell > span {
   white-space: nowrap;
 }
+
 .condition-cell__reason {
   overflow: hidden;
   color: var(--secondary);
   text-overflow: ellipsis;
 }
+
 .is-warning {
   color: var(--warning);
 }
+
 .is-critical {
   color: var(--critical);
 }
@@ -1617,10 +1668,12 @@ input:focus-visible,
   font-size: 12.5px;
   font-weight: 500;
 }
+
 .issue-card__meta {
   color: var(--secondary);
   font-size: 12px;
 }
+
 .issue-card__rule {
   width: 100%;
   height: 1px;
@@ -1646,10 +1699,12 @@ input:focus-visible,
   width: 100%;
   gap: 8px;
 }
+
 .drawer-key-values dt {
   color: var(--muted);
   font-size: 12px;
 }
+
 .drawer-key-values dd {
   min-width: 0;
   margin: 0;
@@ -1677,6 +1732,7 @@ input:focus-visible,
 .current-condition time {
   color: var(--muted);
 }
+
 .drawer-timeline ol {
   margin: 0;
   padding: 0;
@@ -1760,6 +1816,7 @@ input:focus-visible,
 .spin {
   animation: spin 800ms linear infinite;
 }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -1776,9 +1833,11 @@ input:focus-visible,
   .operations-tab {
     padding-inline: 13px;
   }
+
   .operations-canvas {
     padding-inline: 16px;
   }
+
   .operations-table th,
   .operations-table td {
     padding-right: 9px;
